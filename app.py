@@ -8,7 +8,7 @@ import redis
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max upload
+app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024  # 100MB max upload
 basedir = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(basedir, 'transmeet.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'

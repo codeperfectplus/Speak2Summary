@@ -1,8 +1,8 @@
-markdown
+markdown==3.8
 transmeet==0.0.5
-flask
-beautifulsoup4
-celery
-redis
-flask_sqlalchemy
+flask==3.1.0
+beautifulsoup4==4.13.4
+celery==5.5.2
+redis==6.0.0
+flask_sqlalchemy==3.1.1
 openai

@@ -85,8 +85,6 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
                 'status': 'success',
                 'file_id': file_id,
                 'message': 'Processing completed successfully',
-                "transcript": transcript,
-                "minutes": meeting_minutes
             }
             
         except Exception as e:

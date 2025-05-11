@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.13-slim
 
 # Set working directory
 WORKDIR /app
@@ -12,9 +12,6 @@ RUN groupadd -r celery && useradd -r -g celery celery
 
 # Copy the rest of the app
 COPY . .
-
-# Switch to non-root user after setting permissions
-# USER celery
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
