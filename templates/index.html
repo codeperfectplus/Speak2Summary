@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransMeet - Meeting Minutes Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-72 bg-gradient-to-b from-primary-700 to-primary-900 text-white p-6 flex flex-col shadow-xl">
+            <div class="mb-8">
+
+                <a href="/" class="text-3xl font-bold flex items-center">
+                    <span class="mr-3 text-accent-400">🎙️</span>TransMeet
+                </a>
+                <p class="text-primary-200 text-sm mt-2 ml-1">Meeting Minutes Generator</p>
+            </div>
+
+            <!-- Upload Form -->
+            <form action="" method="post" enctype="multipart/form-data" class="mb-6">
+                <div class="mb-5">
+                    <label class="block text-primary-100 text-sm mb-2 font-medium">Upload Audio File</label>
+                    <div class="relative">
+                        <input type="file" name="audio" accept="audio/*" required 
+                               class="block w-full text-sm text-primary-200 
+                                     file:mr-4 file:py-2.5 file:px-4
+                                     file:rounded-full file:border-0 file:text-sm 
+                                     file:bg-primary-600/80 hover:file:bg-primary-500
+                                     file:text-white file:font-medium
+                                     focus:outline-none cursor-pointer">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-accent-600 hover:bg-accent-500 text-white px-5 py-3 rounded-lg
+                                         transition-all transform hover:scale-[1.02] hover:shadow-lg
+                                         flex items-center justify-center font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Process Audio
+                </button>
+            </form>
+
+            <!-- Options Panel -->
+            <div class="bg-primary-800/50 rounded-lg p-4 mt-2">
+                <h3 class="text-primary-200 text-sm uppercase font-semibold mb-3">Options</h3>
+                
+                <div class="space-y-3">
+                    <!-- Show Transcript Toggle -->
+                    <div class="flex items-center">
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                            <input type="checkbox" id="show-transcript" 
+                                  class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
+                                         checked:right-0 checked:border-accent-500 transition-all duration-200"
+                                  onclick="toggleTranscript()"/>
+                            <label for="show-transcript" 
+                                  class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
+                        </div>
+                        <label for="show-transcript" class="text-sm">Show Transcript</label>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+
+            <div class="mt-auto">
+                <div class="flex items-center text-primary-300 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Need help? <a href="#" class="underline text-primary-200">Click here</a></span>
+                </div>
+                <div class="text-xs text-primary-400 mt-2">
+                    © 2025 TransMeet - All rights reserved
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-hidden flex flex-col">
+            <!-- Header -->
+            <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-secondary-800">Meeting Minutes Generator</h2>
+                <div class="flex items-center space-x-4">
+                    <button id="export-btn" class="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Export PDF
+                    </button>
+                    <button id="share-btn" class="flex items-center px-4 py-2 bg-secondary-100 text-secondary-700 rounded-md hover:bg-secondary-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        Share
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 p-6 overflow-auto" id="content-area">
+                {% if minutes or transcript %}
+                <div id="minutes-container" class="transition-all duration-300">
+                    <!-- Meeting Minutes -->
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-semibold flex items-center text-secondary-800">
+                                <span class="mr-3 text-accent-500">📝</span>Meeting Minutes
+                            </h2>
+                            <div class="flex space-x-2">
+                                <button onclick="printMinutes()" class="text-secondary-500 hover:text-secondary-700 flex items-center text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                    Print
+                                </button>
+                                <button onclick="copyToClipboard()" class="text-secondary-500 hover:text-secondary-700 flex items-center text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                        {% if minutes %}
+                        <div class="p-6 border border-secondary-100 minutes-content" id="minutes-content">
+                            {{ minutes|safe }}
+                        </div>
+                        {% else %}
+                        <div class="bg-white rounded-xl shadow-md p-8 border border-secondary-100 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-secondary-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p class="text-secondary-500 italic">No meeting minutes generated yet.</p>
+                            <p class="text-sm text-secondary-400 mt-2">Upload an audio file to get started</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Transcript (Hidden by default) -->
+                    <div id="transcript-section" class="hidden mb-8 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-semibold flex items-center text-secondary-800">
+                                <span class="mr-3 text-primary-500">📄</span>Transcript
+                            </h2>
+                            <button onclick="copyTranscript()" class="text-secondary-500 hover:text-secondary-700 flex items-center text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                Copy Transcript
+                            </button>
+                        </div>
+                        {% if transcript %}
+                        <div class="bg-white rounded-xl shadow-md p-6 border border-secondary-100 max-h-96 overflow-y-auto font-mono text-sm">
+                            <div class="transcript-content">
+                                {{ transcript }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="bg-white rounded-xl shadow-md p-8 border border-secondary-100 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-secondary-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                            <p class="text-secondary-500 italic">No transcript available.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="flex items-center justify-center h-full">
+                    <div class="text-center bg-white p-10 rounded-xl shadow-md max-w-lg w-full">
+                        <div class="bg-primary-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-semibold mb-3 text-secondary-800">No Audio File Uploaded</h2>
+                        <p class="mb-8 text-secondary-600">Upload an audio recording of your meeting to automatically generate minutes</p>
+                        
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="fixed bottom-4 right-4 bg-secondary-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-center transform translate-y-24 transition-transform duration-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+        <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        // Toggle transcript visibility
+        function toggleTranscript() {
+            const transcriptSection = document.getElementById('transcript-section');
+            if (transcriptSection) {
+                transcriptSection.classList.toggle('hidden');
+            }
+        }
+
+        // Display toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-y-24');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-24');
+            }, 3000);
+        }
+
+        // Copy minutes to clipboard
+        function copyToClipboard() {
+            const minutesContent = document.getElementById('minutes-content');
+            if (minutesContent) {
+                navigator.clipboard.writeText(minutesContent.innerText).then(() => {
+                    showToast('Minutes copied to clipboard!');
+                });
+            }
+        }
+
+        // Copy transcript to clipboard
+        function copyTranscript() {
+            const transcriptContent = document.querySelector('.transcript-content');
+            if (transcriptContent) {
+                navigator.clipboard.writeText(transcriptContent.innerText).then(() => {
+                    showToast('Transcript copied to clipboard!');
+                });
+            }
+        }
+
+        // Print minutes
+        function printMinutes() {
+            const printContents = document.getElementById('minutes-content').innerHTML;
+            const originalContents = document.body.innerHTML;
+            
+            document.body.innerHTML = `
+                <div class="p-8">
+                    <h1 class="text-2xl font-bold mb-6">Meeting Minutes</h1>
+                    <div>${printContents}</div>
+                </div>
+            `;
+            
+            window.print();
+            document.body.innerHTML = originalContents;
+            
+            // Reattach event listeners after restoring content
+            setupEventListeners();
+        }
+
+        // Change theme
+        function changeTheme(theme) {
+            const minutesContent = document.getElementById('minutes-content');
+            const container = document.getElementById('minutes-container');
+            
+            if (!minutesContent) return;
+            
+            // Remove existing theme classes
+            container.classList.remove('theme-default', 'theme-modern', 'theme-classic');
+            
+            // Apply selected theme
+            switch(theme) {
+                case 'modern':
+                    container.classList.add('theme-modern');
+                    minutesContent.classList.add('bg-gradient-to-br', 'from-white', 'to-blue-50');
+                    break;
+                case 'classic':
+                    container.classList.add('theme-classic');
+                    minutesContent.classList.add('bg-amber-50');
+                    break;
+                default:
+                    container.classList.add('theme-default');
+                    minutesContent.classList.add('bg-white');
+                    break;
+            }
+            
+            showToast(`Theme changed to ${theme}`);
+        }
+
+        // Initialize highlight.js for code blocks
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+            
+            // Setup initial event listeners
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Set up any event listeners that need to be reattached after DOM changes
+            const exportBtn = document.getElementById('export-btn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => {
+                    showToast('Exporting PDF...');
+                    // logic to export PDF would go here
+                    
+                });
+            }
+            
+            const shareBtn = document.getElementById('share-btn');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', () => {
+                    showToast('Sharing options opened');
+                    // Actual share functionality would go here
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>
