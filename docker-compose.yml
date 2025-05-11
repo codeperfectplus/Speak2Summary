@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  flask:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    depends_on:
+      - redis
+    command: python app.py
+    networks:
+      - transmeet-net
+    volumes:
+      - .:/app
+
+  celery:
+    build: .
+    command: celery -A celery_worker.celery worker --loglevel=info
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    depends_on:
+      - redis
+    networks:
+      - transmeet-net
+    volumes:
+      - .:/app
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - transmeet-net
+
+networks:
+  transmeet-net:
+    driver: bridge

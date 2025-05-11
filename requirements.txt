@@ -2,3 +2,6 @@ markdown
 transmeet
 flask
 beautifulsoup4
+celery
+redis
+flask_sqlalchemy

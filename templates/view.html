@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransMeet - View Meeting Minutes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .minutes-content h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        
+        .minutes-content h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #334155;
+        }
+        
+        .minutes-content h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: #475569;
+        }
+        
+        .minutes-content p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        
+        .minutes-content ul, .minutes-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .minutes-content ul {
+            list-style-type: disc;
+        }
+        
+        .minutes-content ol {
+            list-style-type: decimal;
+        }
+        
+        .minutes-content li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .minutes-content a {
+            color: #0ea5e9;
+            text-decoration: underline;
+        }
+        
+        .minutes-content blockquote {
+            border-left: 4px solid #cbd5e1;
+            padding-left: 1rem;
+            font-style: italic;
+            margin: 1rem 0;
+            color: #64748b;
+        }
+        
+        .minutes-content code {
+            font-family: monospace;
+            background-color: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        
+        .minutes-content pre {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .minutes-content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.875rem;
+        }
+        
+        .minutes-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        .minutes-content th, .minutes-content td {
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        
+        .minutes-content th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        .transcript-content {
+            white-space: pre-wrap;
+            font-family: monospace;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen" x-data="viewData()">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-72 bg-gradient-to-b from-primary-700 to-primary-900 text-white p-6 flex flex-col shadow-xl">
+            <div class="mb-8">
+                <a href="/" class="text-3xl font-bold flex items-center">
+                    <span class="mr-3 text-accent-400">🎙️</span>TransMeet
+                </a>
+                <p class="text-primary-200 text-sm mt-2 ml-1">Meeting Minutes Generator</p>
+            </div>
+
+            <!-- File Info -->
+            <div class="mb-6">
+                <h3 class="text-primary-200 text-sm uppercase font-semibold mb-3">File Info</h3>
+                <div class="bg-primary-800/50 rounded-lg p-4">
+                    <h4 class="font-medium text-white mb-2">{{ file.filename }}</h4>
+                    <div class="text-xs text-primary-300 mb-3">Uploaded: {{ file.upload_time.strftime('%Y-%m-%d %H:%M') }}</div>
+                    
+                    <div class="flex space-x-2 mt-4">
+                        <a href="/" class="text-sm text-primary-300 hover:text-white flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Files
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options Panel -->
+            <div class="bg-primary-800/50 rounded-lg p-4 mt-2">
+                <h3 class="text-primary-200 text-sm uppercase font-semibold mb-3">Options</h3>
+                
+                <div class="space-y-3">
+                    <!-- Show Transcript Toggle -->
+                    <div class="flex items-center justify-between">
+                        <label for="show-transcript" class="text-sm">Show Transcript</label>
+                        <div class="relative inline-block w-10 align-middle select-none">
+                            <input type="checkbox" id="show-transcript" x-model="showTranscript"
+                                  class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
+                                         checked:right-0 checked:border-accent-500 transition-all duration-200"/>
+                            <label for="show-transcript" 
+                                  class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-auto">
+                <div class="flex items-center text-primary-300 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Need help? <a href="#" class="underline text-primary-200">Click here</a></span>
+                </div>
+                <div class="text-xs text-primary-400 mt-2">
+                    © 2025 TransMeet - All rights reserved
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-hidden flex flex-col">
+            <!-- Header -->
+            <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-secondary-800">Meeting Minutes: {{ file.filename }}</h2>
+                <div class="flex items-center space-x-4">
+                    <button @click="printMinutes()" class="flex items-center px-4 py-2 bg-secondary-100 text-secondary-700 rounded-md hover:bg-secondary-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Print
+                    </button>
+                    <button @click="exportAsPDF()" class="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-3-4h3m-3 0a3 3 0 01-3 3H9a3 3 0 01-3-3m6-4h6m-6 0a3 3 0 00-3 3v1a3 3 0 003 3h6a3 3 0 003-3v-1a3 3 0 00-3-3H9z" />
+                        </svg>
+                        Export as PDF
+                    <!-- Continuation of the existing code in view.html -->
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto px-6 py-4">
+                <div class="prose prose-sm max-w-4xl mx-auto minutes-content" x-show="!showTranscript" x-transition>
+                    <template x-if="file.minutes">
+                        <div x-html="file.minutes"></div>
+                    </template>
+                    <template x-if="!file.minutes">
+                        <p class="text-gray-600">No meeting minutes available.</p>
+                    </template>
+                </div>
+
+                <div class="prose prose-sm max-w-4xl mx-auto transcript-content" x-show="showTranscript" x-transition>
+                    <template x-if="file.transcript">
+                        <pre x-text="file.transcript"></pre>
+                    </template>
+                    <template x-if="!file.transcript">
+                        <p class="text-gray-600">Transcript not available.</p>
+                    </template>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function viewData() {
+            return {
+                showTranscript: false,
+                file: {
+                    filename: "{{ file.filename }}",
+                    upload_time: "{{ file.upload_time.strftime('%Y-%m-%d %H:%M') }}",
+                    minutes: {{ file.minutes|tojson }},
+                    transcript: {{ file.transcript|tojson }}
+                },
+                printMinutes() {
+                    const content = this.showTranscript ? this.file.transcript : this.file.minutes;
+                    const win = window.open('', '', 'height=700,width=900');
+                    win.document.write('<html><head><title>Print</title>');
+                    win.document.write('</head><body >');
+                    win.document.write('<pre style="font-family: sans-serif; white-space: pre-wrap;">' + content + '</pre>');
+                    win.document.write('</body></html>');
+                    win.document.close();
+                    win.print();
+                },
+                exportAsPDF() {
+                    const content = this.showTranscript ? this.file.transcript : this.file.minutes;
+                    const blob = new Blob([content], { type: "application/pdf" });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `${this.file.filename}-${this.showTranscript ? 'transcript' : 'minutes'}.pdf`;
+                    link.click();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+

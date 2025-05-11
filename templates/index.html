@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TransMeet - Meeting Minutes Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         tailwind.config = {
             theme: {
@@ -45,12 +46,11 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen" x-data="appData()">
     <div class="flex h-screen">
         <!-- Sidebar -->
         <div class="w-72 bg-gradient-to-b from-primary-700 to-primary-900 text-white p-6 flex flex-col shadow-xl">
             <div class="mb-8">
-
                 <a href="/" class="text-3xl font-bold flex items-center">
                     <span class="mr-3 text-accent-400">🎙️</span>TransMeet
                 </a>
@@ -58,28 +58,78 @@
             </div>
 
             <!-- Upload Form -->
-            <form action="" method="post" enctype="multipart/form-data" class="mb-6">
+            <div class="mb-6">
                 <div class="mb-5">
-                    <label class="block text-primary-100 text-sm mb-2 font-medium">Upload Audio File</label>
-                    <div class="relative">
-                        <input type="file" name="audio" accept="audio/*" required 
-                               class="block w-full text-sm text-primary-200 
-                                     file:mr-4 file:py-2.5 file:px-4
-                                     file:rounded-full file:border-0 file:text-sm 
-                                     file:bg-primary-600/80 hover:file:bg-primary-500
-                                     file:text-white file:font-medium
-                                     focus:outline-none cursor-pointer">
+                    <label class="block text-primary-100 text-sm mb-2 font-medium">Upload Audio Files</label>
+                    <div 
+                        class="relative border-2 border-dashed border-primary-300 rounded-lg p-8 text-center cursor-pointer transition-all hover:border-accent-400"
+                        x-on:dragover.prevent="dragover = true"
+                        x-on:dragleave.prevent="dragover = false"
+                        x-on:drop.prevent="
+                            dragover = false;
+                            handleFileDrop($event);
+                        "
+                        x-bind:class="{'bg-primary-600/30': dragover}"
+                        x-on:click="$refs.fileInput.click()"
+                    >
+                        <input 
+                            type="file" 
+                            x-ref="fileInput" 
+                            multiple
+                            accept="audio/*" 
+                            class="hidden"
+                            x-on:change="handleFileChange"
+                        >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-primary-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p class="text-primary-200">Drag & drop audio files here<br>or click to select</p>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-accent-600 hover:bg-accent-500 text-white px-5 py-3 rounded-lg
-                                         transition-all transform hover:scale-[1.02] hover:shadow-lg
-                                         flex items-center justify-center font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    Process Audio
+                
+                <!-- Selected files preview -->
+                <div x-show="selectedFiles.length > 0" class="mb-5">
+                    <h4 class="text-primary-200 text-sm mb-2 font-medium">Selected Files</h4>
+                    <div class="space-y-2 max-h-40 overflow-y-auto pr-2">
+                        <template x-for="(file, index) in selectedFiles" :key="index">
+                            <div class="flex items-center justify-between bg-primary-800/40 p-2 rounded-md">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                    </svg>
+                                    <span class="text-xs text-primary-100 truncate max-w-36" x-text="file.name"></span>
+                                </div>
+                                <button @click.prevent="removeFile(index)" class="text-primary-300 hover:text-primary-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <button 
+                    x-on:click="uploadFiles"
+                    x-bind:disabled="selectedFiles.length === 0 || uploading"
+                    x-bind:class="{'opacity-50 cursor-not-allowed': selectedFiles.length === 0 || uploading, 'hover:bg-accent-500 hover:scale-[1.02]': selectedFiles.length > 0 && !uploading}"
+                    class="w-full bg-accent-600 text-white px-5 py-3 rounded-lg
+                    transition-all transform hover:shadow-lg
+                    flex items-center justify-center font-medium">
+                    <template x-if="!uploading">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                    </template>
+                    <template x-if="uploading">
+                        <svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </template>
+                    <span x-text="uploading ? 'Uploading...' : 'Process Audio Files'"></span>
                 </button>
-            </form>
+            </div>
 
             <!-- Options Panel -->
             <div class="bg-primary-800/50 rounded-lg p-4 mt-2">
@@ -87,19 +137,28 @@
                 
                 <div class="space-y-3">
                     <!-- Show Transcript Toggle -->
-                    <div class="flex items-center">
-                        <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                            <input type="checkbox" id="show-transcript" 
+                    <div class="flex items-center justify-between">
+                        <label for="show-transcript" class="text-sm">Show Transcript</label>
+                        <div class="relative inline-block w-10 align-middle select-none">
+                            <input type="checkbox" id="show-transcript" x-model="showTranscript"
                                   class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
-                                         checked:right-0 checked:border-accent-500 transition-all duration-200"
-                                  onclick="toggleTranscript()"/>
+                                         checked:right-0 checked:border-accent-500 transition-all duration-200"/>
                             <label for="show-transcript" 
                                   class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
                         </div>
-                        <label for="show-transcript" class="text-sm">Show Transcript</label>
                     </div>
                     
-                    
+                    <!-- Auto-refresh Toggle -->
+                    <div class="flex items-center justify-between">
+                        <label for="auto-refresh" class="text-sm">Auto-refresh Status</label>
+                        <div class="relative inline-block w-10 align-middle select-none">
+                            <input type="checkbox" id="auto-refresh" x-model="autoRefresh"
+                                  class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
+                                         checked:right-0 checked:border-accent-500 transition-all duration-200"/>
+                            <label for="auto-refresh" 
+                                  class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -120,237 +179,364 @@
         <div class="flex-1 overflow-hidden flex flex-col">
             <!-- Header -->
             <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-secondary-800">Meeting Minutes Generator</h2>
+                <h2 class="text-xl font-semibold text-secondary-800">My Audio Files</h2>
                 <div class="flex items-center space-x-4">
-                    <button id="export-btn" class="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <div x-show="uploadSuccess" x-transition class="text-sm text-green-600 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Export PDF
-                    </button>
-                    <button id="share-btn" class="flex items-center px-4 py-2 bg-secondary-100 text-secondary-700 rounded-md hover:bg-secondary-200 transition-colors">
+                        Files uploaded successfully!
+                    </div>
+                    <button id="refresh-btn" @click="refreshFileList" class="flex items-center px-4 py-2 bg-secondary-100 text-secondary-700 rounded-md hover:bg-secondary-200 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        Share
+                        Refresh
                     </button>
                 </div>
             </header>
 
             <!-- Content Area -->
             <div class="flex-1 p-6 overflow-auto" id="content-area">
-                {% if minutes or transcript %}
-                <div id="minutes-container" class="transition-all duration-300">
-                    <!-- Meeting Minutes -->
-                    <div class="mb-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-2xl font-semibold flex items-center text-secondary-800">
-                                <span class="mr-3 text-accent-500">📝</span>Meeting Minutes
-                            </h2>
-                            <div class="flex space-x-2">
-                                <button onclick="printMinutes()" class="text-secondary-500 hover:text-secondary-700 flex items-center text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                    </svg>
-                                    Print
-                                </button>
-                                <button onclick="copyToClipboard()" class="text-secondary-500 hover:text-secondary-700 flex items-center text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                    Copy
-                                </button>
+                <!-- Processing Files Section -->
+                <div x-show="processingFiles.length > 0" class="mb-8">
+                    <h3 class="text-lg font-medium text-secondary-700 mb-4">Processing Files</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <template x-for="file in processingFiles" :key="file.id">
+                            <div class="bg-white rounded-lg shadow-sm border border-secondary-100 overflow-hidden">
+                                <div class="p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <div class="flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                                </svg>
+                                                <h4 class="font-medium text-secondary-800 truncate max-w-xs" x-text="file.filename"></h4>
+                                            </div>
+                                            <div class="text-xs text-secondary-500 mt-1" x-text="formatDate(file.upload_time)"></div>
+                                        </div>
+                                        <span x-show="file.status === 'queued'" class="px-2 py-1 text-xs font-medium bg-secondary-100 text-secondary-600 rounded-full">Queued</span>
+                                        <span x-show="file.status === 'processing'" class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-600 rounded-full">Processing</span>
+                                        <span x-show="file.status === 'failed'" class="px-2 py-1 text-xs font-medium bg-red-100 text-red-600 rounded-full">Failed</span>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <div class="w-full bg-secondary-100 rounded-full h-2">
+                                            <div class="bg-primary-500 h-2 rounded-full transition-all duration-300"
+                                                 x-bind:style="`width: ${file.progress}%`"></div>
+                                        </div>
+                                        <div class="flex justify-between mt-1">
+                                            <span class="text-xs text-secondary-500" x-text="`Progress: ${file.progress}%`"></span>
+                                            <span x-show="file.error" class="text-xs text-red-500" x-text="'Error: ' + (file.error_message || 'Unknown error')"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 flex justify-end">
+                                        <button @click="deleteFile(file.id)" class="text-xs text-red-500 hover:text-red-700 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        {% if minutes %}
-                        <div class="p-6 border border-secondary-100 minutes-content" id="minutes-content">
-                            {{ minutes|safe }}
-                        </div>
-                        {% else %}
-                        <div class="bg-white rounded-xl shadow-md p-8 border border-secondary-100 text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-secondary-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p class="text-secondary-500 italic">No meeting minutes generated yet.</p>
-                            <p class="text-sm text-secondary-400 mt-2">Upload an audio file to get started</p>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Transcript (Hidden by default) -->
-                    <div id="transcript-section" class="hidden mb-8 transition-all duration-300">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-2xl font-semibold flex items-center text-secondary-800">
-                                <span class="mr-3 text-primary-500">📄</span>Transcript
-                            </h2>
-                            <button onclick="copyTranscript()" class="text-secondary-500 hover:text-secondary-700 flex items-center text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                                Copy Transcript
-                            </button>
-                        </div>
-                        {% if transcript %}
-                        <div class="bg-white rounded-xl shadow-md p-6 border border-secondary-100 max-h-96 overflow-y-auto font-mono text-sm">
-                            <div class="transcript-content">
-                                {{ transcript }}
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="bg-white rounded-xl shadow-md p-8 border border-secondary-100 text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-secondary-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                            </svg>
-                            <p class="text-secondary-500 italic">No transcript available.</p>
-                        </div>
-                        {% endif %}
+                        </template>
                     </div>
                 </div>
-                {% else %}
-                <div class="flex items-center justify-center h-full">
+                
+                <!-- Completed Files Section -->
+                <div x-show="completedFiles.length > 0" class="mb-8">
+                    <h3 class="text-lg font-medium text-secondary-700 mb-4">Completed Files</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <template x-for="file in completedFiles" :key="file.id">
+                            <div class="bg-white rounded-lg shadow-sm border border-secondary-100 overflow-hidden">
+                                <div class="p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <div class="flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                                </svg>
+                                                <h4 class="font-medium text-secondary-800 truncate max-w-xs" x-text="file.filename"></h4>
+                                            </div>
+                                            <div class="text-xs text-secondary-500 mt-1" x-text="formatDate(file.upload_time)"></div>
+                                        </div>
+                                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-600 rounded-full">Completed</span>
+                                    </div>
+                                    
+                                    <div class="flex flex-wrap gap-2 mt-4">
+                                        <a :href="`/view/${file.id}`" class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View
+                                        </a>
+                                        <button class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded bg-secondary-100 text-secondary-700 hover:bg-secondary-200 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                            </svg>
+                                            Export
+                                        </button>
+                                        <button class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded bg-secondary-100 text-secondary-700 hover:bg-secondary-200 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                            </svg>
+                                            Share
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mt-4 flex justify-end">
+                                        <button @click="deleteFile(file.id)" class="text-xs text-red-500 hover:text-red-700 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- No Files View -->
+                <div x-show="allFiles.length === 0" class="flex items-center justify-center h-full">
                     <div class="text-center bg-white p-10 rounded-xl shadow-md max-w-lg w-full">
                         <div class="bg-primary-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                             </svg>
                         </div>
-                        <h2 class="text-2xl font-semibold mb-3 text-secondary-800">No Audio File Uploaded</h2>
+                        <h2 class="text-2xl font-semibold mb-3 text-secondary-800">No Audio Files Uploaded</h2>
                         <p class="mb-8 text-secondary-600">Upload an audio recording of your meeting to automatically generate minutes</p>
-                        
                     </div>
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast-notification" class="fixed bottom-4 right-4 bg-secondary-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-center transform translate-y-24 transition-transform duration-300">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+    <div x-show="showToast" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform translate-y-2"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-300"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform translate-y-2"
+         class="fixed bottom-4 right-4 bg-secondary-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-center">
+        <svg x-show="toastType === 'success'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-400" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
         </svg>
-        <span id="toast-message">Copied to clipboard!</span>
+        <svg x-show="toastType === 'error'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <span x-text="toastMessage"></span>
     </div>
 
     <script>
-        // Toggle transcript visibility
-        function toggleTranscript() {
-            const transcriptSection = document.getElementById('transcript-section');
-            if (transcriptSection) {
-                transcriptSection.classList.toggle('hidden');
-            }
-        }
-
-        // Display toast notification
-        function showToast(message) {
-            const toast = document.getElementById('toast-notification');
-            const toastMessage = document.getElementById('toast-message');
-            toastMessage.textContent = message;
-            toast.classList.remove('translate-y-24');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-y-24');
-            }, 3000);
-        }
-
-        // Copy minutes to clipboard
-        function copyToClipboard() {
-            const minutesContent = document.getElementById('minutes-content');
-            if (minutesContent) {
-                navigator.clipboard.writeText(minutesContent.innerText).then(() => {
-                    showToast('Minutes copied to clipboard!');
-                });
-            }
-        }
-
-        // Copy transcript to clipboard
-        function copyTranscript() {
-            const transcriptContent = document.querySelector('.transcript-content');
-            if (transcriptContent) {
-                navigator.clipboard.writeText(transcriptContent.innerText).then(() => {
-                    showToast('Transcript copied to clipboard!');
-                });
-            }
-        }
-
-        // Print minutes
-        function printMinutes() {
-            const printContents = document.getElementById('minutes-content').innerHTML;
-            const originalContents = document.body.innerHTML;
-            
-            document.body.innerHTML = `
-                <div class="p-8">
-                    <h1 class="text-2xl font-bold mb-6">Meeting Minutes</h1>
-                    <div>${printContents}</div>
-                </div>
-            `;
-            
-            window.print();
-            document.body.innerHTML = originalContents;
-            
-            // Reattach event listeners after restoring content
-            setupEventListeners();
-        }
-
-        // Change theme
-        function changeTheme(theme) {
-            const minutesContent = document.getElementById('minutes-content');
-            const container = document.getElementById('minutes-container');
-            
-            if (!minutesContent) return;
-            
-            // Remove existing theme classes
-            container.classList.remove('theme-default', 'theme-modern', 'theme-classic');
-            
-            // Apply selected theme
-            switch(theme) {
-                case 'modern':
-                    container.classList.add('theme-modern');
-                    minutesContent.classList.add('bg-gradient-to-br', 'from-white', 'to-blue-50');
-                    break;
-                case 'classic':
-                    container.classList.add('theme-classic');
-                    minutesContent.classList.add('bg-amber-50');
-                    break;
-                default:
-                    container.classList.add('theme-default');
-                    minutesContent.classList.add('bg-white');
-                    break;
-            }
-            
-            showToast(`Theme changed to ${theme}`);
-        }
-
-        // Initialize highlight.js for code blocks
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightBlock(block);
-            });
-            
-            // Setup initial event listeners
-            setupEventListeners();
-        });
-
-        function setupEventListeners() {
-            // Set up any event listeners that need to be reattached after DOM changes
-            const exportBtn = document.getElementById('export-btn');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', () => {
-                    showToast('Exporting PDF...');
-                    // logic to export PDF would go here
+        function appData() {
+            return {
+                selectedFiles: [],
+                allFiles: [],
+                showTranscript: false,
+                autoRefresh: true,
+                refreshInterval: null,
+                dragover: false,
+                uploading: false,
+                uploadSuccess: false,
+                showToast: false,
+                toastMessage: '',
+                toastType: 'success',
+                
+                init() {
+                    this.refreshFileList();
                     
-                });
-            }
-            
-            const shareBtn = document.getElementById('share-btn');
-            if (shareBtn) {
-                shareBtn.addEventListener('click', () => {
-                    showToast('Sharing options opened');
-                    // Actual share functionality would go here
-                });
-            }
+                    // Set up auto-refresh if enabled
+                    this.$watch('autoRefresh', (value) => {
+                        if (value) {
+                            this.startAutoRefresh();
+                        } else {
+                            this.stopAutoRefresh();
+                        }
+                    });
+                    
+                    if (this.autoRefresh) {
+                        this.startAutoRefresh();
+                    }
+                },
+                
+                startAutoRefresh() {
+                    this.refreshInterval = setInterval(() => {
+                        this.refreshFileList();
+                    }, 5000); // Refresh every 5 seconds
+                },
+                
+                stopAutoRefresh() {
+                    if (this.refreshInterval) {
+                        clearInterval(this.refreshInterval);
+                        this.refreshInterval = null;
+                    }
+                },
+                
+                get processingFiles() {
+                    return this.allFiles.filter(file => file.status !== 'completed');
+                },
+                
+                get completedFiles() {
+                    return this.allFiles.filter(file => file.status === 'completed');
+                },
+                
+                handleFileChange(event) {
+                    const files = event.target.files;
+                    if (files) {
+                        for (let i = 0; i < files.length; i++) {
+                            if (this.isAudioFile(files[i])) {
+                                this.selectedFiles.push(files[i]);
+                            } else {
+                                this.showToastMessage('Only audio files are allowed', 'error');
+                            }
+                        }
+                    }
+                },
+                
+                handleFileDrop(event) {
+                    const files = event.dataTransfer.files;
+                    if (files) {
+                        for (let i = 0; i < files.length; i++) {
+                            if (this.isAudioFile(files[i])) {
+                                this.selectedFiles.push(files[i]);
+                            } else {
+                                this.showToastMessage('Only audio files are allowed', 'error');
+                            }
+                        }
+                    }
+                },
+                
+                isAudioFile(file) {
+                    return file.type.startsWith('audio/');
+                },
+                
+                removeFile(index) {
+                    this.selectedFiles.splice(index, 1);
+                },
+                
+                uploadFiles() {
+                    if (this.selectedFiles.length === 0) return;
+                    
+                    this.uploading = true;
+                    const formData = new FormData();
+                    
+                    this.selectedFiles.forEach(file => {
+                        formData.append('audio', file);
+                    });
+                    
+                    fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.uploading = false;
+                        this.selectedFiles = [];
+                        this.uploadSuccess = true;
+                        this.refreshFileList();
+                        this.showToastMessage('Files uploaded successfully', 'success');
+                        
+                        // Hide success message after 3 seconds
+                        setTimeout(() => {
+                            this.uploadSuccess = false;
+                        }, 3000);
+                    })
+                    .catch(error => {
+                        this.uploading = false;
+                        console.error('Error uploading files:', error);
+                        this.showToastMessage('Error uploading files', 'error');
+                    });
+                },
+                
+                refreshFileList() {
+                    fetch('/api/files')
+                        .then(response => response.json())
+                        .then(data => {
+                            // Update file info including progress
+                            const updatedFiles = data.map(file => {
+                                const existingFile = this.allFiles.find(f => f.id === file.id) || {};
+                                return {
+                                    ...file,
+                                    progress: existingFile.progress || 0
+                                };
+                            });
+                            
+                            this.allFiles = updatedFiles;
+                            
+                            // Update progress for processing files
+                            this.updateFileProgress();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching files:', error);
+                        });
+                },
+                
+                updateFileProgress() {
+                    // For each processing file, fetch its current status
+                    this.processingFiles.forEach(file => {
+                        fetch(`/status/${file.id}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // Update the file in allFiles array
+                                const index = this.allFiles.findIndex(f => f.id === file.id);
+                                if (index !== -1) {
+                                    this.allFiles[index] = {
+                                        ...this.allFiles[index],
+                                        ...data
+                                    };
+                                }
+                            })
+                            .catch(error => {
+                                console.error(`Error fetching status for file ${file.id}:`, error);
+                            });
+                    });
+                },
+                
+                deleteFile(fileId) {
+                    if (confirm('Are you sure you want to delete this file?')) {
+                        fetch(`/delete/${fileId}`, {
+                            method: 'POST'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                this.refreshFileList();
+                                this.showToastMessage('File deleted successfully', 'success');
+                            } else {
+                                this.showToastMessage('Error deleting file', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error deleting file:', error);
+                            this.showToastMessage('Error deleting file', 'error');
+                        });
+                    }
+                },
+                
+                formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleString();
+                },
+                
+                showToastMessage(message, type = 'success') {
+                    this.toastMessage = message;
+                    this.toastType = type;
+                    this.showToast = true;
+                    
+                    setTimeout(() => {
+                        this.showToast = false;
+                    }, 3000);
+                }
+            };
         }
     </script>
-
 </body>
 </html>
