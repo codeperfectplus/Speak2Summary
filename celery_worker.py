@@ -39,7 +39,7 @@ celery.conf.update(
 )
 
 @celery.task(bind=True)
-def process_audio_file(self, file_id, file_path):
+def process_audio_file(self, file_id, file_path, transcription_client, transcription_model, llm_client, llm_model):
     """Process audio file and generate transcript and minutes"""
     app = create_app()
     with app.app_context():
@@ -60,10 +60,10 @@ def process_audio_file(self, file_id, file_path):
                     
             transcript, meeting_minutes = generate_meeting_transcript_and_minutes(
                 meeting_audio_file=file_path,
-                transcription_client="groq",
-                transcription_model="whisper-large-v3-turbo",
-                llm_client="groq",
-                llm_model="llama-3.3-70b-versatile"
+                transcription_client=transcription_client,
+                transcription_model=transcription_model,
+                llm_client=llm_client,
+                llm_model=llm_model
             )
 
             update_progress(file_id, 70)

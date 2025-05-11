@@ -38,6 +38,11 @@ def upload():
         return jsonify({'error': 'No file part'}), 400
     
     uploaded_files = request.files.getlist('audio')
+
+    transcription_client = request.form.get('transcription-client')
+    transcription_model = request.form.get('transcription-model')
+    llm_client = request.form.get('llm-client')
+    llm_model = request.form.get('llm-model')
     
     if not uploaded_files or uploaded_files[0].filename == '':
         return jsonify({'error': 'No selected file'}), 400
@@ -69,7 +74,7 @@ def upload():
             db.session.commit()
             
             # Add to queue - send to Celery task
-            process_audio_file.delay(tracking_id, filepath)
+            process_audio_file.delay(tracking_id, filepath, transcription_client, transcription_model, llm_client, llm_model)
             
             results.append({
                 'id': tracking_id,
