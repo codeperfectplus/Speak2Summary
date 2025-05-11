@@ -21,7 +21,7 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 db.init_app(app)
 
 # Initialize Redis connection
-redis_client = redis.Redis(host='localhost', port=6379, db=0)
+redis_client = redis.Redis(host='redis', port=6379, db=0)
 
 with app.app_context():
     db.create_all()
@@ -45,7 +45,7 @@ def upload():
     results = []
     
     for file in uploaded_files:
-        if file:
+        if file and file.filename:
             # Generate a unique ID for tracking
             tracking_id = str(uuid.uuid4())
             original_filename = file.filename

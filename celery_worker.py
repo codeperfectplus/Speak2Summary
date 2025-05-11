@@ -7,6 +7,7 @@ import traceback
 from flask import Flask
 from models import db, AudioFile
 from utils import render_minutes_with_tailwind
+from transmeet import generate_meeting_transcript_and_minutes
 
 # Create a minimal Flask app for DB context
 def create_app():
@@ -20,12 +21,12 @@ def create_app():
 
 # Initialize Celery
 celery = Celery('transmeet_tasks',
-                broker='redis://localhost:6379/0',
-                backend='redis://localhost:6379/0'
+                broker='redis://redis:6379/0',
+                backend='redis://redis:6379/0'
 )
 
 # Initialize Redis for progress tracking
-redis_client = redis.Redis(host='localhost', port=6379, db=0)
+redis_client = redis.Redis(host='redis', port=6379, db=0)
 
 
 # Configure Celery
@@ -48,23 +49,15 @@ def process_audio_file(self, file_id, file_path):
             if not file_record:
                 return {'error': 'File record not found'}
             
+            print("Debug: File record found, proceeding with processing.")
+            update_progress(file_id, 10)
             print(f"Processing file: {file_record.filename}")
             file_record.status = 'processing'
             db.session.commit()
 
-            update_progress(file_id, 10)
-            time.sleep(3)
+            print("Debug: File status updated to processing.")
 
-            update_progress(file_id, 20)
-            time.sleep(3)
-
-            # Simulate file processing
-            print(f"Processing audio file: {file_path}")
-            update_progress(file_id, 50)
-            time.sleep(3)
-
-            from transmeet import generate_meeting_transcript_and_minutes
-            # Call the actual transcript and minutes generator
+                    
             transcript, meeting_minutes = generate_meeting_transcript_and_minutes(
                 meeting_audio_file=file_path,
                 transcription_client="groq",
@@ -91,11 +84,12 @@ def process_audio_file(self, file_id, file_path):
             return {
                 'status': 'success',
                 'file_id': file_id,
-                'message': 'Processing completed successfully'
+                'message': 'Processing completed successfully',
+                "transcript": transcript,
+                "minutes": meeting_minutes
             }
             
         except Exception as e:
-            # Log the error
             error_message = str(e)
             stack_trace = traceback.format_exc()
             print(f"Error processing file {file_id}: {error_message}")

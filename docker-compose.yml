@@ -6,6 +6,7 @@ services:
       - "5000:5000"
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - redis
     command: python app.py
@@ -19,6 +20,7 @@ services:
     command: celery -A celery_worker.celery worker --loglevel=info
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - redis
     networks:

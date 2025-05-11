@@ -14,7 +14,7 @@ RUN groupadd -r celery && useradd -r -g celery celery
 COPY . .
 
 # Switch to non-root user after setting permissions
-USER celery
+# USER celery
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
