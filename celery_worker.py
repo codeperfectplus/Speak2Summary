@@ -9,6 +9,9 @@ from models import db, AudioFile
 from utils import render_minutes_with_tailwind
 from transmeet import generate_meeting_transcript_and_minutes
 
+from transmeet.utils.general_utils import get_logger
+
+logger = get_logger(__name__)
 # Constants for configuration
 REDIS_URI = 'redis://redis:6379/0'
 SQLALCHEMY_DATABASE_URI = 'sqlite:///transmeet.db'
@@ -63,7 +66,8 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             if not file_record:
                 return {'error': 'File record not found'}
             
-            print(f"Processing file: {file_record.filename}")
+            # print(f"Processing file: {file_record.filename}")
+            logger.info(f"Processing file: {file_record.filename}")
             update_file_status(file_id, 'processing')
             update_progress(file_id, 20)
 
@@ -75,6 +79,15 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
                 llm_client=llm_client,
                 llm_model=llm_model
             )
+
+            # if transcription starts with "Error:", update status and return
+            if transcript.startswith("Error:"):
+                logger.error(f"Transcription error for file {file_id}: {transcript}")
+                error_message = transcript
+                update_file_status(file_id, 'failed', error_message)
+                update_progress(file_id, 0)
+                return {'status': 'error', 'file_id': file_id, 'error_message': error_message}
+
 
             update_progress(file_id, 70)
             meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
@@ -109,5 +122,5 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             return {
                 'status': 'error',
                 'file_id': file_id,
-                'error': error_message
+                'error_message': error_message
             }
