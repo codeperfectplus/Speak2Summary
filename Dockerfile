@@ -3,6 +3,13 @@ FROM python:3.13-slim
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies (ffmpeg, gcc for building some Python packages)
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    gcc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -17,5 +24,5 @@ COPY . .
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Expose port (Flask)
+# Expose port for Flask
 EXPOSE 5000

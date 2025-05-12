@@ -155,5 +155,15 @@ def list_files():
         'minutes_available': f.minutes is not None
     } for f in files])
 
+#health
+@app.route('/health', methods=['GET'])
+def health():
+    try:
+        # Check Redis connection
+        redis_client.ping()
+        return jsonify({'status': 'healthy'}), 200
+    except redis.ConnectionError:
+        return jsonify({'status': 'unhealthy'}), 503
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')

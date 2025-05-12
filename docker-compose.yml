@@ -1,7 +1,12 @@
 version: "3.8"
+
 services:
   flask:
-    build: .
+    container_name: transmeet-flask
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
     ports:
       - "5000:5000"
     environment:
@@ -9,14 +14,25 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - redis
-    command: python app.py
+    command: gunicorn -w 4 -b 0.0.0.0:5000 app:app
     networks:
       - transmeet-net
     volumes:
       - .:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    labels:
+      com.transmeet.service: "flask-backend"
 
   celery:
-    build: .
+    container_name: transmeet-celery
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
     command: celery -A celery_worker.celery worker --loglevel=info
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
@@ -27,14 +43,24 @@ services:
       - transmeet-net
     volumes:
       - .:/app
+    labels:
+      com.transmeet.service: "celery-worker"
 
   redis:
+    container_name: transmeet-redis
     image: redis:7-alpine
     restart: always
     ports:
       - "6380:6379"
     networks:
       - transmeet-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      com.transmeet.service: "redis"
 
 networks:
   transmeet-net:
