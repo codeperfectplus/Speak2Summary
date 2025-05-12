@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, url_for, redirect
+from flask import Flask, render_template, request, jsonify, url_for
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -6,25 +6,34 @@ from celery_worker import process_audio_file
 from models import db, AudioFile
 import redis
 
+# Initialize Flask app and configurations
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024  # 100MB max upload
-basedir = os.path.abspath(os.path.dirname(__file__))
-db_path = os.path.join(basedir, 'transmeet.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Constants
+UPLOAD_FOLDER = 'uploads'
+MAX_CONTENT_LENGTH = 1000 * 1024 * 1024  # 100MB max upload
+SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), "transmeet.db")}'
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# App Configuration
+app.config.from_mapping(
+    UPLOAD_FOLDER=UPLOAD_FOLDER,
+    MAX_CONTENT_LENGTH=MAX_CONTENT_LENGTH,
+    SQLALCHEMY_DATABASE_URI=SQLALCHEMY_DATABASE_URI,
+    SQLALCHEMY_TRACK_MODIFICATIONS=SQLALCHEMY_TRACK_MODIFICATIONS,
+)
 
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize database
+# Initialize database and Redis connection
 db.init_app(app)
-
-# Initialize Redis connection
 redis_client = redis.Redis(host='redis', port=6379, db=0)
 
+# Create database tables
 with app.app_context():
     db.create_all()
+
 
 @app.route('/', methods=['GET'])
 def index():
@@ -32,13 +41,37 @@ def index():
     files = AudioFile.query.order_by(AudioFile.upload_time.desc()).all()
     return render_template('index.html', files=files)
 
+# Helper function to handle file saving
+def save_file(file, tracking_id):
+    original_filename = file.filename
+    secure_name = secure_filename(original_filename)
+    unique_filename = f"{tracking_id}_{secure_name}"
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+    file.save(filepath)
+    return filepath, original_filename
+
+# Helper function to create a new AudioFile entry
+def create_audio_file_entry(tracking_id, original_filename, filepath):
+    new_file = AudioFile(
+        id=tracking_id,
+        filename=original_filename,
+        file_path=filepath,
+        status="queued"
+    )
+    db.session.add(new_file)
+    db.session.commit()
+
+# Helper function to handle audio processing queue
+def add_to_audio_processing_queue(tracking_id, filepath, transcription_client, transcription_model, llm_client, llm_model):
+    process_audio_file.delay(tracking_id, filepath, transcription_client, transcription_model, llm_client, llm_model)
+
+# Route to handle file upload
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'audio' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     
     uploaded_files = request.files.getlist('audio')
-
     transcription_client = request.form.get('transcription-client')
     transcription_model = request.form.get('transcription-model')
     llm_client = request.form.get('llm-client')
@@ -48,33 +81,17 @@ def upload():
         return jsonify({'error': 'No selected file'}), 400
     
     results = []
-    
     for file in uploaded_files:
         if file and file.filename:
             # Generate a unique ID for tracking
             tracking_id = str(uuid.uuid4())
-            original_filename = file.filename
-            secure_name = secure_filename(original_filename)
             
-            # Create unique filename with UUID to prevent collisions
-            unique_filename = f"{tracking_id}_{secure_name}"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            # Save the file and create a new audio file entry
+            filepath, original_filename = save_file(file, tracking_id)
+            create_audio_file_entry(tracking_id, original_filename, filepath)
             
-            # Save the file
-            file.save(filepath)
-            
-            # Create database entry
-            new_file = AudioFile(
-                id=tracking_id,
-                filename=original_filename,
-                file_path=filepath,
-                status="queued"
-            )
-            db.session.add(new_file)
-            db.session.commit()
-            
-            # Add to queue - send to Celery task
-            process_audio_file.delay(tracking_id, filepath, transcription_client, transcription_model, llm_client, llm_model)
+            # Add to queue for processing
+            add_to_audio_processing_queue(tracking_id, filepath, transcription_client, transcription_model, llm_client, llm_model)
             
             results.append({
                 'id': tracking_id,
@@ -84,10 +101,10 @@ def upload():
     
     return jsonify(results)
 
+# Route to fetch the status of a file
 @app.route('/status/<file_id>', methods=['GET'])
 def status(file_id):
     file_record = AudioFile.query.get(file_id)
-    
     if not file_record:
         return jsonify({'error': 'File not found'}), 404
     
@@ -111,30 +128,26 @@ def status(file_id):
     
     return jsonify(response)
 
+# Route to view the minutes of a file
 @app.route('/view/<file_id>', methods=['GET'])
 def view_minutes(file_id):
     file_record = AudioFile.query.get(file_id)
-    
-    if not file_record:
-        return render_template('error.html', message="File not found"), 404
-    
-    if file_record.status != 'completed':
-        return render_template('error.html', message="Processing not complete"), 400
+    if not file_record or file_record.status != 'completed':
+        return render_template('error.html', message="File not found or processing not complete"), 404
     
     return render_template('view.html', file=file_record)
 
+# Route to delete a file from the system
 @app.route('/delete/<file_id>', methods=['POST'])
 def delete_file(file_id):
     file_record = AudioFile.query.get(file_id)
-    
     if not file_record:
         return jsonify({'error': 'File not found'}), 404
     
-    # Delete the physical file if it exists
+    # Delete the physical file and Redis data
     if os.path.exists(file_record.file_path):
         os.remove(file_record.file_path)
     
-    # Delete Redis keys
     redis_client.delete(f"file:{file_id}:progress")
     
     # Delete DB record
@@ -143,6 +156,7 @@ def delete_file(file_id):
     
     return jsonify({'success': True})
 
+# Route to list all files in the system
 @app.route('/api/files', methods=['GET'])
 def list_files():
     files = AudioFile.query.order_by(AudioFile.upload_time.desc()).all()
@@ -155,7 +169,7 @@ def list_files():
         'minutes_available': f.minutes is not None
     } for f in files])
 
-#health
+# Health check route
 @app.route('/health', methods=['GET'])
 def health():
     try:
