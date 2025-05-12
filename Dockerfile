@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy dependencies
 COPY requirements.txt .
+# update pip    
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Create a non-root user and set the user
