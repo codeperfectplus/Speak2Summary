@@ -71,13 +71,21 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             update_file_status(file_id, 'processing')
             update_progress(file_id, 20)
 
+            if transcription_client == "groq":
+                audio_chunk_size_mb = 18
+            elif transcription_client == "openai":
+                audio_chunk_size_mb = 24
+            else:
+                audio_chunk_size_mb = 18
+
             # Generate transcript and meeting minutes
             transcript, meeting_minutes = generate_meeting_transcript_and_minutes(
                 meeting_audio_file=file_path,
                 transcription_client=transcription_client,
                 transcription_model=transcription_model,
                 llm_client=llm_client,
-                llm_model=llm_model
+                llm_model=llm_model,
+                audio_chunk_size_mb=audio_chunk_size_mb,
             )
 
             # if transcription starts with "Error:", update status and return
