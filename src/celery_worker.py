@@ -5,11 +5,11 @@ from datetime import datetime
 import redis
 from flask import Flask
 from celery import Celery
-from models import db, AudioFile
-from utils import render_minutes_with_tailwind
 from transmeet import generate_meeting_transcript_and_minutes
-
 from transmeet.utils.general_utils import get_logger
+
+from src.models import db, AudioFile
+from src.utils import render_minutes_with_tailwind
 
 logger = get_logger(__name__)
 # Constants for configuration

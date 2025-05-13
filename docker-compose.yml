@@ -14,7 +14,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - redis
-    command: gunicorn -w 4 -b 0.0.0.0:5000 app:app
+    command: gunicorn -w 4 -b 0.0.0.0:5000 src.app:app
     networks:
       - transmeet-net
     volumes:
@@ -33,7 +33,7 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: celery -A celery_worker.celery worker --loglevel=info
+    command: celery -A src.celery_worker.celery worker --loglevel=info
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}

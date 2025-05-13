@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, jsonify, url_for
 import os
 import uuid
 from werkzeug.utils import secure_filename
-from celery_worker import process_audio_file
-from models import db, AudioFile
+from src.celery_worker import process_audio_file
+from src.models import db, AudioFile
 import redis
 
 # Initialize Flask app and configurations

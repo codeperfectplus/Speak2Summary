@@ -29,11 +29,11 @@
 
 5. Access the application
 
-    Open your web browser and go to `http://localhost:500` to access the application.
+    Open your web browser and go to `http://localhost:5000` to access the application.
 
 
 ## Screenshots
 
-![Screenshot 1](data/Screenshot%20from%202025-05-11%2021-54-31.png)
+![Screenshot 1](src/screenshots/Screenshot%20from%202025-05-11%2021-54-31.png)
 
-![Screenshot 2](data/Screenshot%20from%202025-05-11%2022-18-12.png)
+![Screenshot 2](src/screenshots/Screenshot%20from%202025-05-11%2022-18-12.png)
