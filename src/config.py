@@ -3,6 +3,8 @@ import redis
 from flask import Flask
 from configparser import ConfigParser
 
+from src.models import db
+
 # Read from config.ini
 config_parser = ConfigParser()
 config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
@@ -34,3 +36,5 @@ app.config.from_mapping(
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+db.init_app(app)

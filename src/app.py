@@ -2,7 +2,7 @@ from src.config import app
 from src.models import db
 from src.routes import audio_bp
 
-db.init_app(app)
+
 
 with app.app_context():
     db.create_all()
