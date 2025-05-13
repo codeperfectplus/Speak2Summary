@@ -1,36 +1,19 @@
-import os
 import traceback
 from datetime import datetime
 
-import redis
-from flask import Flask
 from celery import Celery
 from transmeet import generate_meeting_transcript_and_minutes
 from transmeet.utils.general_utils import get_logger
 
+from src.config import app, REDIS_URI, redis_client
 from src.models import db, AudioFile
 from src.utils import render_minutes_with_tailwind
 
-logger = get_logger(__name__)
-# Constants for configuration
-REDIS_URI = 'redis://redis:6379/0'
-SQLALCHEMY_DATABASE_URI = 'sqlite:///transmeet.db'
 
-# Initialize Flask app
-def create_app():
-    app = Flask(__name__)
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    db_path = os.path.join(basedir, 'transmeet.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db.init_app(app)
-    return app
+logger = get_logger(__name__)
 
 # Initialize Celery
 celery = Celery('transmeet_tasks', broker=REDIS_URI, backend=REDIS_URI)
-
-# Initialize Redis client for progress tracking
-redis_client = redis.Redis(host='redis', port=6379, db=0)
 
 # Celery configuration
 celery.conf.update(
@@ -58,7 +41,6 @@ def update_progress(file_id, progress_value):
 @celery.task(bind=True)
 def process_audio_file(self, file_id, file_path, transcription_client, transcription_model, llm_client, llm_model):
     """Process audio file and generate transcript and minutes."""
-    app = create_app()
     with app.app_context():
         try:
             # Retrieve the file record and update its status to 'processing'
