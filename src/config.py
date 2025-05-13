@@ -12,9 +12,9 @@ config_parser.read(config_path)
 UPLOAD_FOLDER = config_parser.get('flask', 'UPLOAD_FOLDER')
 MAX_CONTENT_LENGTH_MB = config_parser.getint('flask', 'MAX_CONTENT_LENGTH_MB')
 DB_NAME = config_parser.get('flask', 'SQLALCHEMY_DB_NAME')
+SQLALCHEMY_TRACK_MODIFICATIONS = config_parser.getboolean('flask', 'SQLALCHEMY_TRACK_MODIFICATIONS')
 
 SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), DB_NAME)}'
-SQLALCHEMY_TRACK_MODIFICATIONS = config_parser.getboolean('flask', 'SQLALCHEMY_TRACK_MODIFICATIONS')
 
 # Redis config values
 REDIS_HOST = config_parser.get('redis', 'HOST')
