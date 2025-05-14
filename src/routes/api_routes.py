@@ -12,5 +12,11 @@ def list_files():
         'status': f.status,
         'upload_time': f.upload_time.isoformat(),
         'transcript_available': f.transcript is not None,
-        'minutes_available': f.minutes is not None
+        'minutes_available': f.minutes is not None,
+        'error_message': f.error_message,
+        'transcription_client': f.transcription_client,
+        'transcription_model': f.transcription_model,
+        'llm_client': f.llm_client,
+        'llm_model': f.llm_model,
+
     } for f in files])

@@ -16,12 +16,16 @@ def save_file(file, tracking_id):
     file.save(path)
     return path, filename
 
-def create_audio_file_entry(tracking_id, original_filename, filepath):
+def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, t_model, llm_client, llm_model):
     new_file = AudioFile(
         id=tracking_id, #type: ignore
         filename=original_filename, #type: ignore
         file_path=filepath, #type: ignore
-        status="queued" #type: ignore
+        status="queued", #type: ignore
+        transcription_client=t_client, #type: ignore
+        transcription_model=t_model, #type: ignore
+        llm_client=llm_client, #type: ignore
+        llm_model=llm_model #type: ignore
     )
     db.session.add(new_file)
     db.session.commit()
@@ -47,7 +51,7 @@ def upload():
     for file in uploaded_files:
         tracking_id = str(uuid.uuid4())
         path, original_name = save_file(file, tracking_id)
-        create_audio_file_entry(tracking_id, original_name, path)
+        create_audio_file_entry(tracking_id, original_name, path, t_client, t_model, llm_client, llm_model)
         add_to_audio_processing_queue(tracking_id, path, t_client, t_model, llm_client, llm_model)
         results.append({
             'id': tracking_id,

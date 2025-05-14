@@ -3,7 +3,6 @@ from src.models import db
 from src.routes import audio_bp
 
 
-
 with app.app_context():
     db.create_all()
 
