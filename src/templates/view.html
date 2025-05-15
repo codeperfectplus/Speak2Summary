@@ -378,20 +378,7 @@
                         </div>
                     </div>
                     
-                    <!-- Dark Mode Toggle -->
-                    <div class="flex items-center justify-between">
-                        <label for="dark-mode" class="text-sm flex items-center">
-                            <i class="fa-solid fa-moon mr-2 text-secondary-400"></i>
-                            Dark Mode
-                        </label>
-                        <div class="relative inline-block w-12 align-middle select-none">
-                            <input type="checkbox" id="dark-mode" x-model="darkMode"
-                                  class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
-                                         checked:right-0 checked:border-secondary-500 transition-all duration-200"/>
-                            <label for="dark-mode" 
-                                  class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
-                        </div>
-                    </div>
+                   
                     
                     <!-- Text Size -->
                     <div class="space-y-2">
@@ -606,7 +593,7 @@
                     x-transition:enter-end="opacity-100"
                 >
                     <template x-if="file.transcript">
-                        <pre x-html="highlightSearchResults(file.transcript)"></pre>
+                        <div x-html="highlightSearchResults(file.transcript)" style="white-space: pre-wrap;"></div>
                     </template>
                     <template x-if="!file.transcript">
                         <div class="flex flex-col items-center justify-center p-8 text-center rounded-lg border-2 border-dashed" :class="darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-300 text-gray-500'">
