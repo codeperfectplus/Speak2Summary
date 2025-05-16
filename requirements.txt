@@ -1,8 +1,10 @@
 markdown==3.8
-transmeet==0.0.13
+transmeet==0.0.20
 flask==3.1.0
 beautifulsoup4==4.13.4
 celery==5.5.2
 redis==6.0.0
 flask_sqlalchemy==3.1.1
 gunicorn==23.0.0
+elevenlabs==1.59.0
+flask_migrate==4.1.0

@@ -1,8 +1,9 @@
 import traceback
 from datetime import datetime
+from xml.dom import minidom
 
 from celery import Celery
-from transmeet import generate_meeting_transcript_and_minutes
+from transmeet import transcribe_audio_file, generate_meeting_minutes_from_transcript, generate_mind_map_from_transcript
 from transmeet.utils.general_utils import get_logger
 
 from src.config import app, REDIS_URI, redis_client
@@ -61,14 +62,23 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
                 audio_chunk_size_mb = 18
 
             # Generate transcript and meeting minutes
-            transcript, meeting_minutes = generate_meeting_transcript_and_minutes(
-                meeting_audio_file=file_path,
-                transcription_client=transcription_client,
-                transcription_model=transcription_model,
-                llm_client=llm_client,
-                llm_model=llm_model,
-                audio_chunk_size_mb=audio_chunk_size_mb,
+            transcript = transcribe_audio_file(
+                file_path,
+                transcription_client,
+                transcription_model,
+                audio_chunk_size_mb=audio_chunk_size_mb
             )
+            update_progress(file_id, 50)
+
+            meeting_minutes = generate_meeting_minutes_from_transcript(
+                transcript,
+                llm_client,
+                llm_model,
+            )
+            update_progress(file_id, 60)
+
+            # Generate mind map if requested
+            
 
             # if transcription starts with "Error:", update status and return
             if transcript.startswith("Error:"):
@@ -78,9 +88,18 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
                 update_progress(file_id, 0)
                 return {'status': 'error', 'file_id': file_id, 'error_message': error_message}
 
-
             update_progress(file_id, 70)
             meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
+
+            # generate_mind_map = generate_mind_map_from_transcript(
+            mind_map = generate_mind_map_from_transcript(
+                transcript,
+                llm_client,
+                llm_model,
+            )
+
+            update_progress(file_id, 80)
+            # Save the mind map to a file
             
             # Update file record with results and mark as completed
             update_progress(file_id, 90)
@@ -88,6 +107,7 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             file_record.minutes = meeting_minutes
             file_record.status = 'completed'
             file_record.completion_time = datetime.utcnow()
+            file_record.mind_map = mind_map
             db.session.commit()
 
             update_progress(file_id, 100)

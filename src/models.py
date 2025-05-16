@@ -12,6 +12,7 @@ class AudioFile(db.Model):
     status = db.Column(db.String(50), default='queued')  # queued, processing, completed, failed
     upload_time = db.Column(db.DateTime, default=datetime.utcnow)
     completion_time = db.Column(db.DateTime, nullable=True)
+    mind_map = db.Column(db.JSON, nullable=True)
 
     # store information such as transcription client and model
     transcription_client = db.Column(db.String(50), nullable=True)

@@ -37,3 +37,8 @@
 ![Screenshot 1](src/screenshots/Screenshot%20from%202025-05-11%2021-54-31.png)
 
 ![Screenshot 2](src/screenshots/Screenshot%20from%202025-05-11%2022-18-12.png)
+
+
+## Future Plans
+
+1. Create a audio podcast sort of discussion with the AI.

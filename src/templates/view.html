@@ -379,9 +379,6 @@
                                   class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
                         </div>
                     </div>
-                    
-                   
-                    
                     <!-- Text Size -->
                     <div class="space-y-2">
                         <label class="text-sm flex items-center">
@@ -574,8 +571,13 @@
                     x-transition:enter-end="opacity-100"
                 >
                     <template x-if="file.minutes">
-                        <div x-html="highlightSearchResults(file.minutes)"></div>
+                        <div 
+                            x-html="highlightSearchResults(file.minutes)" 
+                            :class="darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'"
+                            class="rounded-lg transition-colors duration-300"
+                        ></div>
                     </template>
+
                     <template x-if="!file.minutes">
                         <div class="flex flex-col items-center justify-center p-8 text-center rounded-lg border-2 border-dashed" :class="darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-300 text-gray-500'">
                             <i class="fa-regular fa-file-lines text-5xl mb-4 opacity-70"></i>
@@ -664,7 +666,7 @@
         function viewData() {
             return {
                 showTranscript: false,
-                darkMode: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
+                darkMode: window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches,
                 minimizeSidebar: window.innerWidth < 768, // Auto collapse for mobile
                 textSizePercentage: 100,
                 loading: true,
@@ -724,7 +726,13 @@
                     const title = this.showTranscript ? 'Transcript' : 'Meeting Minutes';
                     const filename = this.file.filename.replace(/\.[^/.]+$/, '');
                     const date = this.file.upload_time;
-
+                    
+                    const dateFormatted = new Date(date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                    }).replace(/\//g, '-');
+                    
                     const htmlContent = `
                         <html>
                         <head>
@@ -743,7 +751,7 @@
                         <body>
                             <div class="container">
                                 <h1>${title}: ${filename}</h1>
-                                <div class="meta">Generated on: ${date}</div>
+                                <div class="meta">Generated on: ${dateFormatted}</div>
                                 <hr>
                                 ${this.showTranscript ? `<pre>${content}</pre>` : `<div>${content}</div>`}
                                 <hr>
