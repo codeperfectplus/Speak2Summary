@@ -414,72 +414,6 @@
                 </div>
             </div>
 
-            <script>
-                document.addEventListener('alpine:init', () => {
-                    Alpine.data('transcriptionSettings', () => ({
-                        transcriptionModel: 'whisper-large-v3-turbo',
-                        transcriptionClient: '',
-
-                        llmModel: 'llama-3.3-70b-versatile',
-                        llmClient: '',
-
-                        transcriptionModelToClient: {
-                            'whisper-large-v3-turbo': 'groq',
-                            'whisper-large-v3': 'groq',
-                            'whisper-1': 'openai',
-                            'gpt-4o-transcribe': 'openai',
-                            'gpt-4o-mini-transcribe': 'openai'
-                        },
-
-                        llmModelToClient: {
-                            'llama-3.3-70b-versatile': 'groq',
-                            'llama3-70b-8192': 'groq',
-                            'gemma2-9b-it': 'groq',
-                            'mistral-saba-24b': 'groq',
-                            'qwen-qwq-32b': 'groq',
-                            'gpt-3.5-turbo': 'openai',
-                            'chatgpt-4o-latest': 'openai',
-                            'gpt-4o-mini': 'openai'
-                        },
-
-                        transcriptionModelList: [
-                            'whisper-large-v3-turbo', 'whisper-large-v3', 'whisper-1',
-                            'gpt-4o-transcribe', 'gpt-4o-mini-transcribe'
-                        ],
-
-                        llmModelList: [
-                            'llama-3.3-70b-versatile', 'llama3-70b-8192', 'gemma2-9b-it',
-                            'mistral-saba-24b', 'qwen-qwq-32b',
-                            'gpt-3.5-turbo', 'chatgpt-4o-latest', 'gpt-4o-mini'
-                        ],
-
-                        updateTranscriptionClient() {
-                            this.transcriptionClient = this.transcriptionModelToClient[this.transcriptionModel] || '';
-                        },
-
-                        updateLLMClient() {
-                            this.llmClient = this.llmModelToClient[this.llmModel] || '';
-                        },
-
-                        persist() {
-                            localStorage.setItem('transcriptionSettings', JSON.stringify({
-                                transcriptionModel: this.transcriptionModel,
-                                llmModel: this.llmModel
-                            }));
-                        },
-
-                        init() {
-                            const saved = JSON.parse(localStorage.getItem('transcriptionSettings'));
-                            if (saved) {
-                                this.transcriptionModel = saved.transcriptionModel;
-                                this.llmModel = saved.llmModel;
-                            }
-                            this.updateTranscriptionClient();
-                            this.updateLLMClient();
-                        }
-                    }));
-                });
-            </script>
 
             <div class="mt-auto">
                 <div class="flex items-center text-primary-300 text-sm">
@@ -796,6 +730,38 @@
 </body>
 
 <script>
+
+    const transcriptionModelToClient = {
+        'whisper-large-v3-turbo': 'groq',
+        'whisper-large-v3': 'groq',
+        'whisper-1': 'openai',
+        'gpt-4o-transcribe': 'openai',
+        'gpt-4o-mini-transcribe': 'openai'
+    };
+
+    const llmModelToClient = {
+        'llama-3.3-70b-versatile': 'groq',
+        'llama3-70b-8192': 'groq',
+        'gemma2-9b-it': 'groq',
+        'mistral-saba-24b': 'groq',
+        'qwen-qwq-32b': 'groq',
+        'gpt-3.5-turbo': 'openai',
+        'chatgpt-4o-latest': 'openai',
+        'gpt-4o-mini': 'openai'
+    };
+
+    const transcriptionModelList = [
+        'whisper-large-v3-turbo', 'whisper-large-v3', 'whisper-1',
+        'gpt-4o-transcribe', 'gpt-4o-mini-transcribe'
+    ];
+
+    const llmModelList = [
+        'llama-3.3-70b-versatile', 'llama3-70b-8192', 'gemma2-9b-it',
+        'mistral-saba-24b', 'qwen-qwq-32b',
+        'gpt-3.5-turbo', 'chatgpt-4o-latest', 'gpt-4o-mini'
+    ];
+
+
     function appData() {
         return {
             selectedFiles: [],
@@ -894,24 +860,7 @@
 
                 const settings = JSON.parse(localStorage.getItem('transcriptionSettings') || '{}');
 
-                const transcriptionModelToClient = {
-                    'whisper-large-v3-turbo': 'groq',
-                    'whisper-large-v3': 'groq',
-                    'whisper-1': 'openai',
-                    'gpt-4o-transcribe': 'openai',
-                    'gpt-4o-mini-transcribe': 'openai'
-                };
 
-                const llmModelToClient = {
-                    'llama-3.3-70b-versatile': 'groq',
-                    'llama3-70b-8192': 'groq',
-                    'gemma2-9b-it': 'groq',
-                    'mistral-saba-24b': 'groq',
-                    'qwen-qwq-32b': 'groq',
-                    'gpt-3.5-turbo': 'openai',
-                    'chatgpt-4o-latest': 'openai',
-                    'gpt-4o-mini': 'openai'
-                };
 
                 const transcriptionModel = settings.transcriptionModel || '';
                 const llmModel = settings.llmModel || '';
@@ -1084,6 +1033,42 @@
             }
         }
     }
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('transcriptionSettings', () => ({
+            transcriptionModel: 'whisper-large-v3-turbo',
+            transcriptionClient: '',
+
+            llmModel: 'llama-3.3-70b-versatile',
+            llmClient: '',
+
+            updateTranscriptionClient() {
+                this.transcriptionClient = this.transcriptionModelToClient[this.transcriptionModel] || '';
+            },
+
+            updateLLMClient() {
+                this.llmClient = this.llmModelToClient[this.llmModel] || '';
+            },
+
+            persist() {
+                localStorage.setItem('transcriptionSettings', JSON.stringify({
+                    transcriptionModel: this.transcriptionModel,
+                    llmModel: this.llmModel
+                }));
+            },
+
+            init() {
+                const saved = JSON.parse(localStorage.getItem('transcriptionSettings'));
+                if (saved) {
+                    this.transcriptionModel = saved.transcriptionModel;
+                    this.llmModel = saved.llmModel;
+                }
+                this.updateTranscriptionClient();
+                this.updateLLMClient();
+            }
+        }));
+    });
 </script>
+
 
 </html>
