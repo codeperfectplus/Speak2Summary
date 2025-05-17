@@ -353,6 +353,40 @@
                 </button>
             </div>
 
+            <!-- option to upload the transcribe directly -->
+            <div class="bg-primary-800/50 rounded-lg p-4 mt-2">
+                <h3 class="text-primary-200 text-sm uppercase font-semibold mb-3">Upload/Copy Transcript</h3>
+                <p class="text-primary-300 text-xs mb-2">Paste your transcript text or upload a transcript file (txt,
+                    docx, pdf).</p>
+                <form x-data="transcriptUploadForm()"
+                    @showToastMessage.window="showToastMessage($event.detail.message, $event.detail.type)">
+                    <textarea x-model="transcriptText" rows="3" placeholder="Paste transcript text here..."
+                        class="w-full rounded-md bg-primary-700/70 text-white text-sm px-2 py-1.5 border border-primary-600/30 focus:ring-1 focus:ring-accent-400 focus:outline-none mb-2">
+        </textarea>
+                    <input type="file" x-ref="fileInput" accept=".txt,.doc,.docx,.pdf"
+                        class="block w-full text-xs text-primary-200 mb-2" @change="handleFileChange">
+                    <button type="button" @click="submitTranscript" :disabled="uploading"
+                        class="w-full bg-accent-600 text-white px-5 py-3 rounded-lg transition-all transform hover:shadow-lg flex items-center justify-center font-medium"
+                        :class="{ 'opacity-50 cursor-not-allowed': uploading }">
+                        <template x-if="!uploading">
+                            <span>Upload Transcript</span>
+                        </template>
+                        <template x-if="uploading">
+                            <svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            <span>Uploading...</span>
+                        </template>
+                    </button>
+                </form>
+            </div>
+
+
             <!-- Options Panel -->
             <div class="bg-primary-800/50 rounded-lg p-4 mt-2">
                 <h3 class="text-primary-200 text-sm uppercase font-semibold mb-3">Options</h3>
@@ -594,28 +628,32 @@
                                     <!-- Metadata -->
                                     <div class="mt-5 bg-gray-50 rounded-lg p-3">
                                         <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                                            <div>
+                                            <div x-show="file.transcription_client">
                                                 <dt class="text-gray-500">Transcription Client</dt>
                                                 <dd class="font-medium text-gray-900 truncate"
                                                     x-text="file.transcription_client"></dd>
                                             </div>
-                                            <div>
+
+                                            <div x-show="file.transcription_model">
                                                 <dt class="text-gray-500">Transcription Model</dt>
                                                 <dd class="font-medium text-gray-900 truncate"
                                                     x-text="file.transcription_model"></dd>
                                             </div>
-                                            <div>
+
+                                            <div x-show="file.llm_client">
                                                 <dt class="text-gray-500">LLM Client</dt>
                                                 <dd class="font-medium text-gray-900 truncate" x-text="file.llm_client">
                                                 </dd>
                                             </div>
-                                            <div>
+
+                                            <div x-show="file.llm_model">
                                                 <dt class="text-gray-500">LLM Model</dt>
                                                 <dd class="font-medium text-gray-900 truncate" x-text="file.llm_model">
                                                 </dd>
                                             </div>
                                         </dl>
                                     </div>
+
 
                                     <!-- Actions -->
                                     <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
@@ -1045,6 +1083,71 @@
             }
         }));
     });
+    function transcriptUploadForm() {
+        return {
+            transcriptText: '',
+            transcriptFile: null,
+            uploading: false,
+
+            handleFileChange(e) {
+                this.transcriptFile = e.target.files[0];
+            },
+
+            async submitTranscript() {
+                this.uploading = true;
+
+                const formData = new FormData();
+
+                if (this.transcriptFile) {
+                    formData.append('transcript_file', this.transcriptFile);
+                } else if (this.transcriptText.trim()) {
+                    formData.append('transcript_text', this.transcriptText.trim());
+                } else {
+                    alert('Please paste text or select a file.');
+                    this.uploading = false;
+                    return;
+                }
+
+                const settings = JSON.parse(localStorage.getItem('transcriptionSettings') || '{}');
+
+                const transcriptionModel = settings.transcriptionModel || '';
+                const llmModel = settings.llmModel || '';
+
+                const transcriptionClient = transcriptionModelToClient[transcriptionModel] || '';
+                const llmClient = llmModelToClient[llmModel] || '';
+
+                formData.append('transcription-model', transcriptionModel);
+                formData.append('transcription-client', transcriptionClient);
+                formData.append('llm-model', llmModel);
+                formData.append('llm-client', llmClient);
+
+                try {
+                    const response = await fetch('/upload_transcript', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error('Upload failed');
+
+                    this.transcriptText = '';
+                    this.transcriptFile = null;
+                    this.$refs.fileInput.value = '';
+
+                    window.dispatchEvent(new CustomEvent('showToastMessage', {
+                        detail: {
+                            message: 'Transcript uploaded successfully',
+                            type: 'success'
+                        }
+                    }));
+                } catch (e) {
+                    alert('Error uploading transcript.');
+                }
+
+                this.uploading = false;
+            }
+        };
+    }
+
 </script>
 
 

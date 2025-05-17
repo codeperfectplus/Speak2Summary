@@ -134,3 +134,57 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
                 'file_id': file_id,
                 'error_message': error_message
             }
+
+
+@celery.task(bind=True)
+def process_transcript_file(self, file_id, transcription_content, llm_client, llm_model):
+    """Process transcript file and generate meeting minutes."""
+    with app.app_context():
+        try:
+            # Retrieve the file record and update its status to 'processing'
+            file_record = AudioFile.query.get(file_id)
+            if not file_record:
+                return {'error': 'File record not found'}
+
+            update_file_status(file_id, 'processing')
+            update_progress(file_id, 20)
+
+            # Generate meeting minutes
+            meeting_minutes = generate_meeting_minutes_from_transcript(
+                transcription_content,
+                llm_client,
+                llm_model,
+            )
+
+            update_progress(file_id, 50)
+            meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
+            update_progress(file_id, 60)
+
+
+            # Update file record with results and mark as completed
+            file_record.minutes = meeting_minutes
+            file_record.status = 'completed'
+            file_record.completion_time = datetime.utcnow()
+            db.session.commit()
+            update_progress(file_id, 100)   
+            return {
+                'status': 'success',
+                'file_id': file_id,
+                'message': 'Processing completed successfully',
+            }
+        except Exception as e:
+            error_message = str(e)
+            stack_trace = traceback.format_exc()
+            print(f"Error processing transcript file {file_id}: {error_message}\n{stack_trace}")
+
+            # Update file record to 'failed' and store the error
+            update_file_status(file_id, 'failed', f"{error_message}\n\n{stack_trace}")
+            
+            # Clear progress in Redis
+            redis_client.delete(f"file:{file_id}:progress")
+            
+            return {
+                'status': 'error',
+                'file_id': file_id,
+                'error_message': error_message
+            }
