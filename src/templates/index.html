@@ -731,35 +731,12 @@
 
 <script>
 
-    const transcriptionModelToClient = {
-        'whisper-large-v3-turbo': 'groq',
-        'whisper-large-v3': 'groq',
-        'whisper-1': 'openai',
-        'gpt-4o-transcribe': 'openai',
-        'gpt-4o-mini-transcribe': 'openai'
-    };
+    const transcriptionModelToClient = {{ transcription_model_to_client | tojson }};
+    const llmModelToClient = {{ llm_model_to_client | tojson }};
 
-    const llmModelToClient = {
-        'llama-3.3-70b-versatile': 'groq',
-        'llama3-70b-8192': 'groq',
-        'gemma2-9b-it': 'groq',
-        'mistral-saba-24b': 'groq',
-        'qwen-qwq-32b': 'groq',
-        'gpt-3.5-turbo': 'openai',
-        'chatgpt-4o-latest': 'openai',
-        'gpt-4o-mini': 'openai'
-    };
+    const transcriptionModelList = {{ transcription_model_list | tojson }};
+    const llmModelList = {{ llm_model_list | tojson }};
 
-    const transcriptionModelList = [
-        'whisper-large-v3-turbo', 'whisper-large-v3', 'whisper-1',
-        'gpt-4o-transcribe', 'gpt-4o-mini-transcribe'
-    ];
-
-    const llmModelList = [
-        'llama-3.3-70b-versatile', 'llama3-70b-8192', 'gemma2-9b-it',
-        'mistral-saba-24b', 'qwen-qwq-32b',
-        'gpt-3.5-turbo', 'chatgpt-4o-latest', 'gpt-4o-mini'
-    ];
 
 
     function appData() {

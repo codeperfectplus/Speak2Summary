@@ -1,0 +1,19 @@
+{
+    "transcription_model_to_client": {
+        "whisper-large-v3-turbo": "groq",
+        "whisper-large-v3": "groq",
+        "whisper-1": "openai",
+        "gpt-4o-transcribe": "openai",
+        "gpt-4o-mini-transcribe": "openai"
+    },
+    "llm_model_to_client": {
+        "llama-3.3-70b-versatile": "groq",
+        "llama3-70b-8192": "groq",
+        "gemma2-9b-it": "groq",
+        "mistral-saba-24b": "groq",
+        "qwen-qwq-32b": "groq",
+        "gpt-3.5-turbo": "openai",
+        "chatgpt-4o-latest": "openai",
+        "gpt-4o-mini": "openai"
+    }
+}
