@@ -176,9 +176,12 @@ def mindmap():
         jsmind_data = convert_to_jsmind(mindmap_data)
         filename = file_record.filename
         
+        root_title = jsmind_data.get("meta", {}).get("name", "Mind Map")
+
         return render_template("mindmap.html", 
                                jsmind_data=json.dumps(jsmind_data),
-                               map_title=filename,
+                               map_title=root_title,
+                               filename=filename,
                                creator_name = jsmind_data.get("meta", {}).get("author", "unknown"),
                                creation_date = jsmind_data.get("meta", {}).get("created_at", "unknown"),
         )
@@ -195,11 +198,14 @@ def mindmap():
         file_record.status = "completed"
         file_record.completion_time = datetime.utcnow()
         db.session.commit()
+        
 
         jsmind_data = convert_to_jsmind(mindmap_data)
+        root_title = jsmind_data.get("meta", {}).get("name", "Mind Map")
         return render_template("mindmap.html", 
                                jsmind_data=json.dumps(jsmind_data),
-                                 map_title=file_record.filename,
+                                 map_title=root_title,
+                                 filename=file_record.filename,
                                     creator_name = jsmind_data.get("meta", {}).get("author", "unknown"),
                                     creation_date = jsmind_data.get("meta", {}).get("created_at", "unknown"),
         )

@@ -85,11 +85,19 @@
 <body class="bg-bg flex min-h-screen overflow-hidden">
   <!-- Sidebar -->
   <div class="w-72 bg-gradient-to-b from-primary-700 to-primary-900 text-white p-6 flex flex-col shadow-xl">
-    <div class="mb-8">
-      <a href="/" class="text-3xl font-bold flex items-center">
-        <span class="mr-3 text-accent-400">🧠</span>MindMapper
+    
+    <div class="mb-10">
+      <a href="/" class="flex items-center space-x-3 group">
+      <span class="inline-flex items-center justify-center rounded-full bg-accent-400/20 p-2 text-accent-400 text-3xl transition-transform group-hover:scale-110">🧠</span>
+      <span class="flex flex-col">
+        <span class="font-extrabold text-2xl tracking-tight text-white group-hover:text-accent-400 transition-colors">MindMapper</span>
+        <span class="text-xs font-semibold text-accent-400 mt-0.5">by TransMeet</span>
+      </span>
       </a>
-      <p class="text-primary-200 text-sm mt-2 ml-1">Interactive Mind Map Creator</p>
+      <p class="text-primary-200 text-sm mt-4 ml-1 pl-1 border-l-4 border-accent-400/60">
+      <span class="font-medium">Interactive Mind Map Creator</span><br>
+      <span class="text-primary-300">Visualize, organize, and export your ideas.</span>
+      </p>
     </div>
 
     <!-- Mind Map Controls -->
@@ -173,7 +181,11 @@
 
   <main class="flex-1">
     <div class="flex items-center justify-between bg-white shadow-md p-4 w-full">
-    <h1 class="text-xl font-semibold text-gray-800">{{ map_title }}</h1>
+    <div>
+      <h1 class="text-xl font-semibold text-gray-800">{{ map_title }}</h1>
+      <div class="text-sm text-gray-500 mt-1">File: <span class="font-mono">{{ filename }}</span></div>
+    </div>
+
     <div class="flex items-center space-x-2">
       <span class="text-sm text-gray-500">Created by: {{ creator_name }}</span>
       <span class="text-sm text-gray-500">Date: {{ creation_date }}</span>
@@ -197,14 +209,18 @@
       theme: 'primary',
       editable: false,
       support_html: false,
-      view: {
-        engine: 'canvas',
-        hmargin: 100,
-        vmargin: 50,
-        line_width: 2,
-        line_color: '#2563eb',
-        expand_level: 1
-      }
+       view: {
+    engine: 'canvas',                  // Use canvas for better performance over SVG
+    hmargin: 100,                      // Horizontal margin around the mind map
+    vmargin: 60,                       // Vertical margin between nodes
+    line_width: 2,                     // Slightly thicker lines for better visibility
+    line_color: '#2563eb',            // Tailwind Blue-600, gives it a modern touch
+    node_overflow: 'wrap',            // Wrap long text instead of truncating
+    draggable: true,                   // Allow panning the mind map
+    hide_scrollbars_when_dragging: true,
+    expand_level: 2,                   // Start with nodes expanded up to 2 levels
+    animate_to_center: true            // Animate map to center on load
+  }
     });
     jm.show(mindmapData);
 
