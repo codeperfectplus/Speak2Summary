@@ -2,13 +2,13 @@ import os
 from flask import jsonify
 
 from src.config import redis_client
-from src.models import db, AudioFile
+from src.models import db, TranscriptEntry
 from . import audio_bp
 
 
 @audio_bp.route('/delete/<file_id>', methods=['POST'])
 def delete_file(file_id):
-    file = AudioFile.query.get(file_id)
+    file = TranscriptEntry.query.get(file_id)
     if not file:
         return jsonify({'error': 'File not found'}), 404
 

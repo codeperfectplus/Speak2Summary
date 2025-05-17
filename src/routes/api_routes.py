@@ -1,11 +1,11 @@
 from flask import jsonify
 
-from src.models import AudioFile
+from src.models import TranscriptEntry
 from . import audio_bp
 
 @audio_bp.route('/api/files', methods=['GET'])
 def list_files():
-    files = AudioFile.query.order_by(AudioFile.upload_time.desc()).all()
+    files = TranscriptEntry.query.order_by(TranscriptEntry.upload_time.desc()).all()
     return jsonify([{
         'id': f.id,
         'filename': f.filename,

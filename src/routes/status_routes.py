@@ -1,13 +1,13 @@
 from flask import jsonify, url_for
 
 from src.config import redis_client
-from src.models import AudioFile
+from src.models import TranscriptEntry
 from . import audio_bp
 
 
 @audio_bp.route('/status/<file_id>', methods=['GET'])
 def status(file_id):
-    file_record = AudioFile.query.get(file_id)
+    file_record = TranscriptEntry.query.get(file_id)
     if not file_record:
         return jsonify({'error': 'File not found'}), 404
 

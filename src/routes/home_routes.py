@@ -1,6 +1,6 @@
 from flask import render_template
 
-from src.models import AudioFile
+from src.models import TranscriptEntry
 from . import audio_bp
 
 import json
@@ -22,7 +22,7 @@ llm_model_list = list(llm_model_to_client.keys())
 
 @audio_bp.route('/', methods=['GET'])
 def index():
-    files = AudioFile.query.order_by(AudioFile.upload_time.desc()).all()
+    files = TranscriptEntry.query.order_by(TranscriptEntry.upload_time.desc()).all()
     return render_template('index.html', files=files,         transcription_model_to_client=transcription_model_to_client,
         llm_model_to_client=llm_model_to_client,
         transcription_model_list=transcription_model_list,

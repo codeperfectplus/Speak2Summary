@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from datetime import datetime
 from flask import render_template, Blueprint, request, jsonify, send_file
-from src.models import AudioFile, db
+from src.models import TranscriptEntry, db
 from transmeet import generate_mind_map_from_transcript
 
 
@@ -130,7 +130,7 @@ def generate_mindmap_api():
     if not file_id:
         return jsonify({"error": "Missing 'id' in request body"}), 400
 
-    file_record = AudioFile.query.filter_by(id=file_id).first()
+    file_record = TranscriptEntry.query.filter_by(id=file_id).first()
 
     if not file_record:
         return jsonify({"error": f"No record found for id: {file_id}"}), 404
@@ -165,7 +165,7 @@ def mindmap():
     if not file_id:
         return "Missing 'id' parameter in request", 400
 
-    file_record = AudioFile.query.filter_by(id=file_id).first()
+    file_record = TranscriptEntry.query.filter_by(id=file_id).first()
     
     if not file_record:
         return f"No record found for id: {file_id}", 404
@@ -220,7 +220,7 @@ def export_mindmap():
     if not file_id:
         return jsonify({"error": "Missing 'id' in request body"}), 400
 
-    file_record = AudioFile.query.filter_by(id=file_id).first()
+    file_record = TranscriptEntry.query.filter_by(id=file_id).first()
 
     if not file_record:
         return jsonify({"error": f"No record found for id: {file_id}"}), 404

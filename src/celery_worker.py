@@ -7,7 +7,7 @@ from transmeet import transcribe_audio_file, generate_meeting_minutes_from_trans
 from transmeet.utils.general_utils import get_logger
 
 from src.config import app, REDIS_URI, redis_client
-from src.models import db, AudioFile
+from src.models import db, TranscriptEntry
 from src.utils import render_minutes_with_tailwind
 
 
@@ -28,7 +28,7 @@ celery.conf.update(
 # Reusable functions to handle progress and file updates
 def update_file_status(file_id, status, error_message=None):
     """Update file record status in the database."""
-    file_record = AudioFile.query.get(file_id)
+    file_record = TranscriptEntry.query.get(file_id)
     if file_record:
         file_record.status = status
         if error_message:
@@ -45,7 +45,7 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
     with app.app_context():
         try:
             # Retrieve the file record and update its status to 'processing'
-            file_record = AudioFile.query.get(file_id)
+            file_record = TranscriptEntry.query.get(file_id)
             if not file_record:
                 return {'error': 'File record not found'}
             
@@ -142,7 +142,7 @@ def process_transcript_file(self, file_id, transcription_content, llm_client, ll
     with app.app_context():
         try:
             # Retrieve the file record and update its status to 'processing'
-            file_record = AudioFile.query.get(file_id)
+            file_record = TranscriptEntry.query.get(file_id)
             if not file_record:
                 return {'error': 'File record not found'}
 

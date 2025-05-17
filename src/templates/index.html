@@ -356,8 +356,7 @@
             <!-- option to upload the transcribe directly -->
             <div class="bg-primary-800/50 rounded-lg p-4 mt-2">
                 <h3 class="text-primary-200 text-sm uppercase font-semibold mb-3">Upload/Copy Transcript</h3>
-                <p class="text-primary-300 text-xs mb-2">Paste your transcript text or upload a transcript file (txt,
-                    docx, pdf).</p>
+                <p class="text-primary-300 text-xs mb-2">Paste your transcript text or upload a transcript file (txt).</p>
                 <form x-data="transcriptUploadForm()"
                     @showToastMessage.window="showToastMessage($event.detail.message, $event.detail.type)">
                     <textarea x-model="transcriptText" rows="3" placeholder="Paste transcript text here..."

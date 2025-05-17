@@ -3,8 +3,8 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-class AudioFile(db.Model):
-    __tablename__ = 'audio_files'
+class TranscriptEntry(db.Model):
+    __tablename__ = 'transcription'
     
     id = db.Column(db.String(36), primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
@@ -26,9 +26,7 @@ class AudioFile(db.Model):
     
     # Error handling
     error_message = db.Column(db.Text, nullable=True)
-    
-    def __repr__(self):
-        return f'<AudioFile {self.filename}>'
+
         
     def to_dict(self):
         return {

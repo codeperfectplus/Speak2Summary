@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
 
-from src.models import db, AudioFile
+from src.models import db, TranscriptEntry
 from src.celery_worker import process_audio_file, process_transcript_file
 from src.config import app
 from . import audio_bp
@@ -17,8 +17,23 @@ def save_file(file, tracking_id):
     file.save(path)
     return path, filename
 
+def extract_text_from_file(file, ext):
+    if ext == '.txt':
+        return file.read().decode('utf-8')
+    # elif ext == '.pdf':
+    #     from PyPDF2 import PdfReader
+    #     reader = PdfReader(file)
+    #     return "\n".join([page.extract_text() for page in reader.pages])
+    # elif ext == '.docx':
+    #     from docx import Document
+    #     doc = Document(file)
+    #     return "\n".join([para.text for para in doc.paragraphs])
+    else:
+        raise ValueError("Unsupported file type")
+
+
 def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, t_model, llm_client, llm_model):
-    new_file = AudioFile(
+    new_file = TranscriptEntry(
         id=tracking_id, #type: ignore
         filename=original_filename, #type: ignore
         file_path=filepath, #type: ignore
@@ -32,7 +47,7 @@ def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, 
     db.session.commit()
 
 def create_text_file_entry(tracking_id, original_filename, filepath, llm_client, llm_model, transcription):
-    new_file = AudioFile(
+    new_file = TranscriptEntry(
         id=tracking_id, #type: ignore
         filename=original_filename, #type: ignore
         file_path=filepath, #type: ignore
@@ -46,6 +61,9 @@ def create_text_file_entry(tracking_id, original_filename, filepath, llm_client,
 
 def add_to_audio_processing_queue(tracking_id, filepath, t_client, t_model, llm_client, llm_model):
     process_audio_file.delay(tracking_id, filepath, t_client, t_model, llm_client, llm_model) #type: ignore
+
+def add_to_transcript_processing_queue(tracking_id, content, llm_client, llm_model):
+    process_transcript_file.delay(tracking_id, content, llm_client, llm_model) #type: ignore
 
 @audio_bp.route('/upload', methods=['POST'])
 def upload():
@@ -78,39 +96,52 @@ def upload():
 #process_transcript_file(self, file_id, transcription_content, llm_client, llm_model):
 @audio_bp.route('/upload_transcript', methods=['POST'])
 def upload_transcript():
-    if 'transcript_file' not in request.files and 'transcript_text' not in request.form:
-        return jsonify({'error': 'No file or text provided'}), 400
-    
-    content = None
-    # get file or text from request and generate a unique tracking ID and save it
-    tracking_id = str(uuid.uuid4())
-    if 'transcript_file' in request.files:
-        file = request.files['transcript_file']
-        
-        # open text file and read the content
-        if file.filename.endswith('.txt'): # type: ignore
-            content = file.read().decode('utf-8')
-    elif 'transcript_text' in request.form:
-        content = request.form['transcript_text']
-
-    #save in the uploads folder\
+    transcript_text = request.form.get('transcript_text', '').strip()
+    uploaded_files = request.files.getlist('transcript_file')
 
     llm_client = request.form.get('llm-client')
     llm_model = request.form.get('llm-model')
 
-    if content is None or content == '':
-        return jsonify({'error': 'No content provided'}), 400
-    
-    # tracking_id, original_filename, filepath, llm_client, llm_model, transcription):
-    create_text_file_entry(tracking_id, 'transcript.txt', '', 'openai', 'gpt-3.5-turbo', content) #type: ignore
-                                 
-    process_transcript_file.delay(tracking_id, content, llm_client, llm_model) #type: ignore
-    
-    print(f"Transcript ID: {tracking_id}")
-    print(f"Transcript Content: {content}")
+    if not transcript_text and not uploaded_files:
+        return jsonify({'error': 'No transcript text or file provided'}), 400
 
-    return jsonify({
-        'id': tracking_id,
-        'status': 'queued',    
-    })
+    processed_ids = []
 
+    # Handle pasted text
+    if transcript_text:
+        tracking_id = str(uuid.uuid4())
+        create_text_file_entry(tracking_id, 'pasted_transcript.txt', '', llm_client, llm_model, transcript_text)
+        add_to_transcript_processing_queue(tracking_id, transcript_text, llm_client, llm_model)
+        processed_ids.append({'id': tracking_id, 'source': 'text'})
+
+    # Handle uploaded files
+    for file in uploaded_files:
+        if not file:
+            continue
+
+        filename = secure_filename(file.filename)
+        ext = os.path.splitext(filename)[1].lower()
+        allowed_exts = {'.txt'}
+
+        if ext not in allowed_exts:
+            continue  # skip disallowed files
+
+        # Extract text content
+        try:
+            content = extract_text_from_file(file, ext)  # Your utility to read file contents
+        except Exception as e:
+            print(f"Error reading {filename}: {e}")
+            continue
+
+        if not content.strip():
+            continue
+
+        tracking_id = str(uuid.uuid4())
+        create_text_file_entry(tracking_id, filename, '', llm_client, llm_model, content)
+        add_to_transcript_processing_queue(tracking_id, content, llm_client, llm_model)
+        processed_ids.append({'id': tracking_id, 'source': 'file', 'filename': filename})
+
+    if not processed_ids:
+        return jsonify({'error': 'No valid transcripts processed'}), 400
+
+    return jsonify({'status': 'queued', 'processed': processed_ids}), 200
