@@ -18,5 +18,6 @@ def list_files():
         'transcription_model': f.transcription_model,
         'llm_client': f.llm_client,
         'llm_model': f.llm_model,
+        'mind_map': f.mind_map,
 
     } for f in files])

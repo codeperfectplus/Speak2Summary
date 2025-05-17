@@ -10,5 +10,6 @@ from . import (
     view_routes,
     delete_routes,
     health_routes,
-    home_routes
+    home_routes,
+    mindmap_route
 )

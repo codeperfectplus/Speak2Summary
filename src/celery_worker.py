@@ -91,12 +91,12 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             update_progress(file_id, 70)
             meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
 
-            # generate_mind_map = generate_mind_map_from_transcript(
-            mind_map = generate_mind_map_from_transcript(
-                transcript,
-                llm_client,
-                llm_model,
-            )
+            # # generate_mind_map = generate_mind_map_from_transcript(
+            # mind_map = generate_mind_map_from_transcript(
+            #     transcript,
+            #     llm_client,
+            #     llm_model,
+            # )
 
             update_progress(file_id, 80)
             # Save the mind map to a file
@@ -107,7 +107,7 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             file_record.minutes = meeting_minutes
             file_record.status = 'completed'
             file_record.completion_time = datetime.utcnow()
-            file_record.mind_map = mind_map
+            file_record.mind_map = None  # mind_map
             db.session.commit()
 
             update_progress(file_id, 100)
