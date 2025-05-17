@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>{{map_title}}</title>  
+  <title>{{map_title}}</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -34,27 +35,34 @@
   </script>
   <!-- Feather Icons -->
   <script src="https://unpkg.com/feather-icons"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/js/jsmind.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/style/jsmind.css" />
   <script src="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/js/jsmind.screenshot.js"></script>
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/style/jsmind.css" />
-  <script src="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/js/jsmind.js"></script>
 
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      height: 100%; background: #f1f5f9;
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #f1f5f9;
     }
+
     #jsmind_container {
-      width: calc(100vw - 288px); /* 288px is the width of sidebar (w-72 + padding) */
+      width: calc(100vw - 288px);
+      /* 288px is the width of sidebar (w-72 + padding) */
       height: 100vh;
       min-height: 600px;
       background: #fff;
       border-radius: 0.75rem;
-      box-shadow: 0 2px 24px 2px rgba(37,99,235,0.09);
+      box-shadow: 0 2px 24px 2px rgba(37, 99, 235, 0.09);
       transition: box-shadow 0.3s;
-      position: relative; z-index: 1;
+      position: relative;
+      z-index: 1;
       margin-left: auto;
     }
+
     .tooltip {
       position: absolute;
       background: rgba(0, 0, 0, 0.75);
@@ -67,36 +75,44 @@
       transition: opacity 0.3s;
       z-index: 50;
     }
-    .tooltip.active { opacity: 1; }
-    .jsmind-node.selected > .jsmind-node-content {
+
+    .tooltip.active {
+      opacity: 1;
+    }
+
+    .jsmind-node.selected>.jsmind-node-content {
       background-color: #2563eb !important;
       color: white !important;
       border-radius: 6px;
-      max-width: 240px;               /* Set max width for nodes */
+      max-width: 240px;
+      /* Set max width for nodes */
       padding: 3px 12px;
       font-weight: 600;
-      box-shadow: 0 2px 8px 1px rgba(37,99,235,0.11);
+      box-shadow: 0 2px 8px 1px rgba(37, 99, 235, 0.11);
       transition: background 0.2s, box-shadow 0.2s;
-      outline: 2px solid #06b6d4; outline-offset: 2px;
+      outline: 2px solid #06b6d4;
+      outline-offset: 2px;
     }
-    
   </style>
 </head>
+
 <body class="bg-bg flex min-h-screen overflow-hidden">
   <!-- Sidebar -->
   <div class="w-72 bg-gradient-to-b from-primary-700 to-primary-900 text-white p-6 flex flex-col shadow-xl">
-    
+
     <div class="mb-10">
       <a href="/" class="flex items-center space-x-3 group">
-      <span class="inline-flex items-center justify-center rounded-full bg-accent-400/20 p-2 text-accent-400 text-3xl transition-transform group-hover:scale-110">🧠</span>
-      <span class="flex flex-col">
-        <span class="font-extrabold text-2xl tracking-tight text-white group-hover:text-accent-400 transition-colors">MindMapper</span>
-        <span class="text-xs font-semibold text-accent-400 mt-0.5">by TransMeet</span>
-      </span>
+        <span
+          class="inline-flex items-center justify-center rounded-full bg-accent-400/20 p-2 text-accent-400 text-3xl transition-transform group-hover:scale-110">🧠</span>
+        <span class="flex flex-col">
+          <span
+            class="font-extrabold text-2xl tracking-tight text-white group-hover:text-accent-400 transition-colors">MindMapper</span>
+          <span class="text-xs font-semibold text-accent-400 mt-0.5">by TransMeet</span>
+        </span>
       </a>
       <p class="text-primary-200 text-sm mt-4 ml-1 pl-1 border-l-4 border-accent-400/60">
-      <span class="font-medium">Interactive Mind Map Creator</span><br>
-      <span class="text-primary-300">Visualize, organize, and export your ideas.</span>
+        <span class="font-medium">Interactive Mind Map Creator</span><br>
+        <span class="text-primary-300">Visualize, organize, and export your ideas.</span>
       </p>
     </div>
 
@@ -105,16 +121,19 @@
       <div class="mb-5">
         <label class="block text-primary-100 text-sm mb-2 font-medium">View Controls</label>
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="jm.expand_all()" 
+          <button onclick="jm.expand_all()"
             class="bg-primary-800/50 hover:bg-primary-600/60 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
             </svg>
             Expand All
           </button>
-          <button onclick="jm.collapse_all()" 
+          <button onclick="jm.collapse_all()"
             class="bg-primary-800/50 hover:bg-primary-600/60 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7" />
             </svg>
             Collapse All
@@ -125,8 +144,10 @@
       <button id="export-btn" class="w-full bg-accent-600 text-white px-5 py-3 rounded-lg
                 transition-all transform hover:bg-accent-500 hover:scale-[1.02] hover:shadow-lg
                 flex items-center justify-center font-medium">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
         <span>Export Mind Map</span>
       </button>
@@ -143,17 +164,19 @@
           <div class="relative inline-block w-10 align-middle select-none">
             <input type="checkbox" id="auto-focus" checked class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
                        checked:right-0 checked:border-accent-500 transition-all duration-200" />
-            <label for="auto-focus" class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
+            <label for="auto-focus"
+              class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
           </div>
         </div>
-        
+
         <!-- Show Tooltip Toggle -->
         <div class="flex items-center justify-between">
           <label for="show-tooltip" class="text-sm">Show Node Tooltip</label>
           <div class="relative inline-block w-10 align-middle select-none">
             <input type="checkbox" id="show-tooltip" checked class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
                        checked:right-0 checked:border-accent-500 transition-all duration-200" />
-            <label for="show-tooltip" class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
+            <label for="show-tooltip"
+              class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
           </div>
         </div>
       </div>
@@ -176,26 +199,28 @@
 
   <!-- Main Mind Map Container -->
   <!-- filename and other details about the mind map -->
-  
-  
+
+
 
   <main class="flex-1">
     <div class="flex items-center justify-between bg-white shadow-md p-4 w-full">
-    <div>
-      <h1 class="text-xl font-semibold text-gray-800">{{ map_title }}</h1>
-      <div class="text-sm text-gray-500 mt-1">File: <span class="font-mono">{{ filename }}</span></div>
-    </div>
+      <div>
+        <h1 class="text-xl font-semibold text-gray-800">{{ map_title }}</h1>
+        <div class="text-sm text-gray-500 mt-1">File: <span class="font-mono">{{ filename }}</span></div>
+      </div>
 
-    <div class="flex items-center space-x-2">
-      <span class="text-sm text-gray-500">Created by: {{ creator_name }}</span>
-      <span class="text-sm text-gray-500">Date: {{ creation_date }}</span>
+      <div class="flex items-center space-x-2">
+        <span class="text-sm text-gray-500">Created by: {{ creator_name }}</span>
+        <span class="text-sm text-gray-500">Date: {{ creation_date }}</span>
+      </div>
     </div>
-  </div>  
     <div id="jsmind_container" class="relative"></div>
     <div id="tooltip" class="tooltip"></div>
   </main>
 
   <script>
+    console.log('jsMind.screenshot:', jsMind.screenshot);
+
     let jm = null;
     let selectedNodeId = null;
     const tooltip = document.getElementById('tooltip');
@@ -209,28 +234,35 @@
       theme: 'primary',
       editable: false,
       support_html: false,
-       view: {
-    engine: 'canvas',                  // Use canvas for better performance over SVG
-    hmargin: 100,                      // Horizontal margin around the mind map
-    vmargin: 60,                       // Vertical margin between nodes
-    line_width: 2,                     // Slightly thicker lines for better visibility
-    line_color: '#2563eb',            // Tailwind Blue-600, gives it a modern touch
-    node_overflow: 'wrap',            // Wrap long text instead of truncating
-    draggable: true,                   // Allow panning the mind map
-    hide_scrollbars_when_dragging: true,
-    expand_level: 2,                   // Start with nodes expanded up to 2 levels
-    animate_to_center: true            // Animate map to center on load
-  }
+      view: {
+        engine: 'canvas',                  // Use canvas for better performance over SVG
+        hmargin: 100,                      // Horizontal margin around the mind map
+        vmargin: 60,                       // Vertical margin between nodes
+        line_width: 2,                     // Slightly thifcker lines for better visibility
+        line_color: '#2563eb',            // Tailwind Blue-600, gives it a modern touch
+        node_overflow: 'wrap',            // Wrap long text instead of truncating
+        draggable: true,                   // Allow panning the mind map
+        hide_scrollbars_when_dragging: true,
+        expand_level: 2,                   // Start with nodes expanded up to 2 levels
+        animate_to_center: true            // Animate map to center on load
+      }
     });
     jm.show(mindmapData);
 
+
+
     // Collapse all except root
-    jm.get_all_nodes().forEach(node => {
-      if (!node.isroot) jm.collapse_node(node.id);
-    });
+    const nodes = jm.mind.nodes;
+    // Expand root node's immediate children before screenshot
+    const rootNode = jm.get_root();
+    if (rootNode && rootNode.children) {
+      rootNode.children.forEach(child => jm.expand_node(child.id));
+    }
+
+
 
     // Toggle tooltip visibility
-    showTooltipToggle.addEventListener('change', function() {
+    showTooltipToggle.addEventListener('change', function () {
       if (!this.checked) {
         tooltip.classList.remove('active');
       }
@@ -238,9 +270,10 @@
 
     // Click to expand/collapse node
     document.getElementById('jsmind_container').addEventListener('click', e => {
-      const nodeId = jm.get_node_by_dom(e.target);
-      if (nodeId) {
-        const node = jm.get_node(nodeId);
+      const node = jm.find_node_by_dom(e.target);
+
+      if (node) {
+        const node = jm.get_node(node.id);
         jm.toggle_node(node.id);
 
         // Manage selection style
@@ -250,9 +283,9 @@
             prev.element.classList.remove('selected');
           }
         }
-        selectedNodeId = nodeId;
+        selectedNodeId = node.id;
         node.element.classList.add('selected');
-        
+
         // Auto-focus if enabled
         if (document.getElementById('auto-focus').checked) {
           node.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -260,44 +293,34 @@
       }
     });
 
-    // Tooltip logic
-    document.getElementById('jsmind_container').addEventListener('mousemove', e => {
-      if (!showTooltipToggle.checked) return;
-      
-      const nodeId = jm.get_node_by_dom(e.target);
-      if (nodeId) {
-        const node = jm.get_node(nodeId);
-        tooltip.classList.add('active');
-        tooltip.style.left = e.pageX + 15 + 'px';
-        tooltip.style.top = e.pageY + 10 + 'px';
-        tooltip.textContent = `Node: ${node.topic} (${node.children.length} child${node.children.length !== 1 ? "ren" : ""})`;
-      } else {
-        tooltip.classList.remove('active');
-      }
-    });
-
-    document.getElementById('jsmind_container').addEventListener('mouseleave', () => {
-      tooltip.classList.remove('active');
-    });
-
-    // Export button
-
-    
     document.getElementById('export-btn').addEventListener('click', () => {
-      const screenshot = jm.screenshot.shoot();
-      if (screenshot) {
-        const link = document.createElement('a');
-        link.download = 'mindmap.png';
-        link.href = screenshot;
-        link.click();
-      } else {
-        alert('Screenshot failed. Try expanding the mind map or check if screenshot plugin is loaded.');
+      // Expand root children to ensure something is visible
+      const rootNode = jm.get_root();
+      if (rootNode && rootNode.children) {
+        rootNode.children.forEach(child => jm.expand_node(child.id));
       }
-    });
 
+      // Wait a bit for the UI to render, then take the screenshot
+      setTimeout(() => {
+        if (jm.screenshot && typeof jm.screenshot.shoot === 'function') {
+          const screenshot = jm.screenshot.shoot();
+          if (screenshot) {
+            const link = document.createElement('a');
+            link.download = 'mindmap.png';
+            link.href = screenshot;
+            link.click();
+          } else {
+            alert('Screenshot failed. Try expanding the mind map.');
+          }
+        } else {
+          alert('Screenshot plugin not initialized correctly.');
+        }
+      }, 300);
+    });
 
     // Icon updates
     feather.replace();
   </script>
 </body>
+
 </html>
