@@ -28,7 +28,7 @@
     <title>TransMeet - Meeting Minutes Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
     <script>
         tailwind.config = {
             theme: {
@@ -78,212 +78,7 @@
             }
         }
     </script>
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        .minutes-content h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-top: 1.75rem;
-            margin-bottom: 1.25rem;
-            color: #312e81;
-            border-bottom: 2px solid #e0e7ff;
-            padding-bottom: 0.5rem;
-        }
-
-        .minutes-content h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
-            color: #4338ca;
-        }
-
-        .minutes-content h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-top: 1.25rem;
-            margin-bottom: 0.75rem;
-            color: #6366f1;
-        }
-
-        .minutes-content p {
-            margin-bottom: 1rem;
-            line-height: 1.7;
-        }
-
-        .minutes-content ul,
-        .minutes-content ol {
-            margin-left: 1.5rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .minutes-content ul {
-            list-style-type: disc;
-        }
-
-        .minutes-content ol {
-            list-style-type: decimal;
-        }
-
-        .minutes-content li {
-            margin-bottom: 0.5rem;
-        }
-
-        .minutes-content a {
-            color: #4f46e5;
-            text-decoration: underline;
-            text-underline-offset: 2px;
-            transition: all 0.2s;
-        }
-
-        .minutes-content a:hover {
-            color: #4338ca;
-        }
-
-        .minutes-content blockquote {
-            border-left: 4px solid #a5b4fc;
-            padding: 0.5rem 0 0.5rem 1.25rem;
-            font-style: italic;
-            margin: 1.5rem 0;
-            color: #4338ca;
-            background-color: #eef2ff;
-            border-radius: 0 0.5rem 0.5rem 0;
-        }
-
-        .minutes-content code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            background-color: #f1f5f9;
-            padding: 0.2rem 0.4rem;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-            color: #3730a3;
-        }
-
-        .minutes-content pre {
-            background-color: #1e293b;
-            color: #f8fafc;
-            padding: 1.25rem;
-            border-radius: 0.75rem;
-            overflow-x: auto;
-            margin: 1.5rem 0;
-            border: 1px solid #475569;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .minutes-content pre code {
-            background-color: transparent;
-            color: inherit;
-            padding: 0;
-            font-size: 0.9rem;
-        }
-
-        .minutes-content table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin: 1.5rem 0;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .minutes-content th,
-        .minutes-content td {
-            border: 1px solid #e0e7ff;
-            padding: 0.75rem 1rem;
-            text-align: left;
-        }
-
-        .minutes-content th {
-            background-color: #eef2ff;
-            font-weight: 600;
-            color: #3730a3;
-            border-bottom: 2px solid #c7d2fe;
-        }
-
-        .minutes-content tr:nth-child(even) {
-            background-color: #f9fafb;
-        }
-
-        .minutes-content tr:hover {
-            background-color: #f3f4f6;
-        }
-
-        .transcript-content {
-            white-space: pre-wrap;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            line-height: 1.6;
-            background-color: #f8fafc;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .highlight-text {
-            background: linear-gradient(120deg, rgba(165, 180, 252, 0.4) 0%, rgba(249, 168, 212, 0.4) 100%);
-            padding: 0.15rem 0;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #a5b4fc;
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #818cf8;
-        }
-
-        /* Print specific styles */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-
-            body {
-                font-size: 12pt;
-                line-height: 1.5;
-            }
-
-            .minutes-content h1 {
-                font-size: 18pt;
-                color: #000 !important;
-            }
-
-            .minutes-content h2 {
-                font-size: 16pt;
-                color: #000 !important;
-            }
-
-            .minutes-content h3 {
-                font-size: 14pt;
-                color: #000 !important;
-            }
-
-            a {
-                text-decoration: none !important;
-                color: #000 !important;
-            }
-
-            @page {
-                margin: 1.5cm;
-            }
-        }
-    </style>
+ 
 
 </head>
 
@@ -538,7 +333,7 @@
         <div class="flex-1 overflow-hidden flex flex-col">
             <!-- Header -->
             <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-secondary-800">My Audio Files</h2>
+                <h2 class="text-xl font-semibold text-secondary-800">Transcription, Meeting Minutes & Mind Map</h2>
                 <div class="flex items-center space-x-4">
                     <div x-show="uploadSuccess" x-transition class="text-sm text-green-600 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"

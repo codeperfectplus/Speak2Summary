@@ -59,62 +59,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/js/jsmind.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/style/jsmind.css" />
   <script src="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/js/jsmind.screenshot.js"></script>
-
-
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #f1f5f9;
-    }
-
-    #jsmind_container {
-      width: calc(100vw - 288px);
-      /* 288px is the width of sidebar (w-72 + padding) */
-      height: 100vh;
-      min-height: 600px;
-      background: #fff;
-      border-radius: 0.75rem;
-      box-shadow: 0 2px 24px 2px rgba(37, 99, 235, 0.09);
-      transition: box-shadow 0.3s;
-      position: relative;
-      z-index: 1;
-      margin-left: auto;
-    }
-
-    .tooltip {
-      position: absolute;
-      background: rgba(0, 0, 0, 0.75);
-      color: white;
-      padding: 6px 10px;
-      font-size: 12px;
-      border-radius: 4px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 50;
-    }
-
-    .tooltip.active {
-      opacity: 1;
-    }
-
-    .jsmind-node.selected>.jsmind-node-content {
-      background-color: #2563eb !important;
-      color: white !important;
-      border-radius: 6px;
-      max-width: 240px;
-      /* Set max width for nodes */
-      padding: 3px 12px;
-      font-weight: 600;
-      box-shadow: 0 2px 8px 1px rgba(37, 99, 235, 0.11);
-      transition: background 0.2s, box-shadow 0.2s;
-      outline: 2px solid #06b6d4;
-      outline-offset: 2px;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mindmap.css') }}" />
 </head>
 
 <body class="bg-bg flex min-h-screen overflow-hidden">
