@@ -70,11 +70,11 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             )
             update_progress(file_id, 50)
 
-            meeting_minutes = generate_meeting_minutes_from_transcript(
-                transcript,
-                llm_client,
-                llm_model,
-            )
+            # meeting_minutes = generate_meeting_minutes_from_transcript(
+            #     transcript,
+            #     llm_client,
+            #     llm_model,
+            # )
             update_progress(file_id, 60)
 
             # Generate mind map if requested
@@ -89,7 +89,7 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
                 return {'status': 'error', 'file_id': file_id, 'error_message': error_message}
 
             update_progress(file_id, 70)
-            meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
+            # meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
 
             # # generate_mind_map = generate_mind_map_from_transcript(
             # mind_map = generate_mind_map_from_transcript(
@@ -104,7 +104,7 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             # Update file record with results and mark as completed
             update_progress(file_id, 90)
             file_record.transcript = transcript
-            file_record.minutes = meeting_minutes
+            file_record.minutes = None
             file_record.status = 'completed'
             file_record.completion_time = datetime.utcnow()
             file_record.mind_map = None  # mind_map
@@ -150,19 +150,20 @@ def process_transcript_file(self, file_id, transcription_content, llm_client, ll
             update_progress(file_id, 20)
 
             # Generate meeting minutes
-            meeting_minutes = generate_meeting_minutes_from_transcript(
-                transcription_content,
-                llm_client,
-                llm_model,
-            )
+            # meeting_minutes = generate_meeting_minutes_from_transcript(
+            #     transcription_content,
+            #     llm_client,
+            #     llm_model,
+            # )
+            # meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
 
             update_progress(file_id, 50)
-            meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
+            
             update_progress(file_id, 60)
 
 
             # Update file record with results and mark as completed
-            file_record.minutes = meeting_minutes
+            file_record.minutes = None
             file_record.status = 'completed'
             file_record.completion_time = datetime.utcnow()
             db.session.commit()
