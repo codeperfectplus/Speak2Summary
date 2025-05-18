@@ -20,6 +20,8 @@ def save_file(file, tracking_id):
 def extract_text_from_file(file, ext):
     if ext == '.txt':
         return file.read().decode('utf-8')
+    if ext == '.py':
+        return file.read().decode('utf-8')
     # elif ext == '.pdf':
     #     from PyPDF2 import PdfReader
     #     reader = PdfReader(file)
@@ -119,9 +121,9 @@ def upload_transcript():
         if not file:
             continue
 
-        filename = secure_filename(file.filename)
+        filename = secure_filename(file.filename) #type: ignore
         ext = os.path.splitext(filename)[1].lower()
-        allowed_exts = {'.txt'}
+        allowed_exts = {'.txt', '.py'}
 
         if ext not in allowed_exts:
             continue  # skip disallowed files

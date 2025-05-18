@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import datetime
 from flask import render_template, Blueprint, request, jsonify, send_file
 from src.models import TranscriptEntry, db
-from transmeet import generate_mind_map_from_transcript
+from transmeet import generate_mind_map_from_transcript, generate_meeting_minutes_from_transcript
 
 
 from . import audio_bp
@@ -154,6 +154,38 @@ def generate_mindmap_api():
     db.session.commit()
 
     return jsonify({"message": "Mind map generated successfully", "mind_map": mindmap_data}), 200
+
+
+@audio_bp.route("/api/generate_meeting_minutes", methods=["POST"])
+def generate_meeting_minutes_api():
+    """API to generate meeting minutes from transcript"""
+    data = request.get_json()
+    file_id = data.get("id")
+
+    if not file_id:
+        return jsonify({"error": "Missing 'id' in request body"}), 400
+
+    file_record = TranscriptEntry.query.filter_by(id=file_id).first()
+
+    if not file_record:
+        return jsonify({"error": f"No record found for id: {file_id}"}), 404
+
+    if file_record.minutes:
+        return jsonify({"message": "Meeting minutes already exist", "minutes": file_record.minutes}), 200
+    if not file_record.transcript:
+        return jsonify({"error": "Transcript not found for this file"}), 400
+    
+    # Generate the meeting minutes
+    meeting_minutes = generate_meeting_minutes_from_transcript(
+        file_record.transcript,
+        llm_client=file_record.llm_client,
+        llm_model=file_record.llm_model
+    )
+    file_record.minutes = meeting_minutes
+    file_record.status = "completed"
+    file_record.completion_time = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"message": "Meeting minutes generated successfully", "minutes": meeting_minutes}), 200
 
 
 
