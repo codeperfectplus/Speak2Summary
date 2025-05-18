@@ -7,6 +7,9 @@ from flask import render_template, request, jsonify, send_file
 from src.models import TranscriptEntry, db
 from transmeet import generate_mind_map_from_transcript, generate_meeting_minutes_from_transcript
 from src.utils import render_minutes_with_tailwind
+from transmeet.utils.general_utils import get_logger
+
+logger = get_logger(__name__)
 
 from . import audio_bp
 
@@ -21,11 +24,11 @@ def load_mindmap(file_path):
             with open(file_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
-            print(f"Mind map file not found: {file_path}")
+            logger.warning(f"Mind map file not found: {file_path}")
             # Return a default empty mind map
             return {"Root Topic": "New Mind Map"}
     except Exception as e:
-        print(f"Error loading mind map data: {e}")
+        logger.error(f"Error loading mind map data: {e}")
         return {"Root Topic": "Error Loading Mind Map"}
 
 def convert_to_jsmind(data):
@@ -220,7 +223,6 @@ def mindmap():
         )
     else:
         transcript = file_record.transcript
-        print("Transcript:", transcript)
 
         mindmap_data = generate_mind_map_from_transcript(
             transcript,
@@ -267,7 +269,6 @@ def export_mindmap():
 
     filename = f"{file_record.filename}_mindmap.json"
     ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent
-    print("Root Directory:", ROOT_DIR)
     export_dir = os.path.join(ROOT_DIR, "exports")
 
     os.makedirs(export_dir, exist_ok=True)

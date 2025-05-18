@@ -17,7 +17,7 @@ def reduce_noise(input_path: str, output_path: str):
     reduced_noise = nr.reduce_noise(y=data, sr=rate)
     wavfile.write(output_path, rate, reduced_noise.astype(np.int16))
     os.remove(temp_wav)
-    print(f"Noise-reduced audio saved to: {output_path}")
+    # print(f"Noise-reduced audio saved to: {output_path}")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-print(ROOT_DIR)
 
 models_path = ROOT_DIR / 'src/models.json'
 

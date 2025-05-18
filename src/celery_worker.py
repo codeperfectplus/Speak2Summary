@@ -10,7 +10,6 @@ from src.config import app, REDIS_URI, redis_client
 from src.models import db, TranscriptEntry
 from src.utils import render_minutes_with_tailwind
 
-
 logger = get_logger(__name__)
 
 # Initialize Celery
@@ -49,7 +48,6 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
             if not file_record:
                 return {'error': 'File record not found'}
             
-            # print(f"Processing file: {file_record.filename}")
             logger.info(f"Processing file: {file_record.filename}")
             update_file_status(file_id, 'processing')
             update_progress(file_id, 20)
@@ -121,7 +119,7 @@ def process_audio_file(self, file_id, file_path, transcription_client, transcrip
         except Exception as e:
             error_message = str(e)
             stack_trace = traceback.format_exc()
-            print(f"Error processing file {file_id}: {error_message}\n{stack_trace}")
+            logger.error(f"Error processing file {file_id}: {error_message}\n{stack_trace}")
 
             # Update file record to 'failed' and store the error
             update_file_status(file_id, 'failed', f"{error_message}\n\n{stack_trace}")
@@ -176,7 +174,7 @@ def process_transcript_file(self, file_id, transcription_content, llm_client, ll
         except Exception as e:
             error_message = str(e)
             stack_trace = traceback.format_exc()
-            print(f"Error processing transcript file {file_id}: {error_message}\n{stack_trace}")
+            logger.error(f"Error processing transcript file {file_id}: {error_message}\n{stack_trace}")
 
             # Update file record to 'failed' and store the error
             update_file_status(file_id, 'failed', f"{error_message}\n\n{stack_trace}")

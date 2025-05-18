@@ -2,12 +2,17 @@
 import os
 import uuid
 from datetime import datetime
+from venv import logger
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
 
 from src.models import db, TranscriptEntry
 from src.celery_worker import process_audio_file, process_transcript_file
 from src.config import app
+from transmeet.utils.general_utils import get_logger
+
+logger  = get_logger(__name__)
+
 from . import audio_bp
 
 def save_file(file, tracking_id):
@@ -132,7 +137,7 @@ def upload_transcript():
         try:
             content = extract_text_from_file(file, ext)  # Your utility to read file contents
         except Exception as e:
-            print(f"Error reading {filename}: {e}")
+            logger.error(f"Error reading {filename}: {e}")
             continue
 
         if not content.strip():
