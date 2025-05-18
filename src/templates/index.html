@@ -4,9 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransMeet - Meeting Minutes Generator">
+    <meta name="author" content="TransMeet Team">
+    <meta name="keywords" content="TransMeet, Meeting Minutes, Audio Transcription, AI">
+    <meta name="theme-color" content="#4f46e5">
+    <title>TransMeet - Meeting Minutes Generator</title>
+    
+    <link rel="icon" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-16.png') }}" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-32.png') }}" type="image/png">
+    
+    <link rel="icon" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-70.png') }}" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-96.png') }}" type="image/png">
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-57.png') }}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-60.png') }}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-72.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-76.png') }}">
+
+    <meta name="apple-mobile-web-app-title" content="TransMeet">
+    <meta name="application-name" content="TransMeet">
+    <meta name="msapplication-TileColor" content="#4f46e5">
+    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-144.png') }}">
+
     <title>TransMeet - Meeting Minutes Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -269,7 +291,7 @@
     <div class="flex h-screen">
         <!-- Sidebar -->
         <div
-            class="w-72 bg-gradient-to-br from-primary-800 to-primary-950 text-white p-6 flex flex-col shadow-xl rounded-lg">
+            class="w-72 bg-gradient-to-br from-primary-800 to-primary-900 text-white p-6 flex flex-col shadow-xl transition-all duration-300">
             <!-- Header with Logo -->
             <div class="mb-6 flex items-center">
                 <div class="bg-accent-500/20 p-2 rounded-full mr-3">
@@ -287,7 +309,7 @@
             <div class="mb-5 bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
                 <h3 class="text-primary-100 text-sm font-medium mb-3 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-accent-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
+                        viewBox="0 0 20 20" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                     </svg>
@@ -433,61 +455,7 @@
                 </form>
             </div>
 
-            <!-- Options Panel -->
-            <div class="mb-5 bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
-                <h3 class="text-primary-100 text-sm font-medium mb-3 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-accent-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Display Options
-                </h3>
-
-                <div class="space-y-3">
-                    <!-- Show Transcript Toggle -->
-                    <div class="flex items-center justify-between py-1">
-                        <label for="show-transcript" class="text-sm text-primary-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-primary-300"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            Show Transcript
-                        </label>
-                        <div class="relative inline-block w-10 align-middle select-none">
-                            <input type="checkbox" id="show-transcript" x-model="showTranscript" class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
-                                 checked:right-0 checked:border-accent-500 transition-all duration-200" />
-                            <label for="show-transcript"
-                                class="block overflow-hidden h-6 rounded-full bg-primary-600/40 cursor-pointer"></label>
-                        </div>
-                    </div>
-
-                    <!-- Auto-refresh Toggle -->
-                    <div class="flex items-center justify-between py-1 border-t border-primary-700/30 pt-3">
-                        <label for="auto-refresh" class="text-sm text-primary-200 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-primary-300"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Auto-refresh Status
-                        </label>
-                        <div class="relative inline-block w-10 align-middle select-none">
-                            <input type="checkbox" id="auto-refresh" x-model="autoRefresh" class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
-                                 checked:right-0 checked:border-accent-500 transition-all duration-200" />
-                            <label for="auto-refresh"
-                                class="block overflow-hidden h-6 rounded-full bg-primary-600/40 cursor-pointer"></label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Transcription Settings Form -->
+                        <!-- Transcription Settings Form -->
             <div x-data="transcriptionSettings" x-init="init()" class="mb-5">
                 <div class="bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
                     <h3 class="text-primary-100 text-sm font-medium mb-3 flex items-center">

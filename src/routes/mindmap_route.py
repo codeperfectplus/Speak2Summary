@@ -3,7 +3,7 @@ import json
 import os
 from pathlib import Path
 from datetime import datetime
-from flask import render_template, Blueprint, request, jsonify, send_file
+from flask import render_template, request, jsonify, send_file
 from src.models import TranscriptEntry, db
 from transmeet import generate_mind_map_from_transcript, generate_meeting_minutes_from_transcript
 from src.utils import render_minutes_with_tailwind
