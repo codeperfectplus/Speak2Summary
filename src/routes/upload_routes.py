@@ -1,4 +1,5 @@
 
+from math import e
 import os
 import uuid
 from datetime import datetime
@@ -25,12 +26,14 @@ def save_file(file, tracking_id):
 def extract_text_from_file(file, ext):
     if ext == '.txt':
         return file.read().decode('utf-8')
-    if ext == '.py':
+    elif ext == '.py':
         return file.read().decode('utf-8')
-    # elif ext == '.pdf':
-    #     from PyPDF2 import PdfReader
-    #     reader = PdfReader(file)
-    #     return "\n".join([page.extract_text() for page in reader.pages])
+    elif ext == '.md':
+        return file.read().decode('utf-8')
+    elif ext == '.pdf':
+        from PyPDF2 import PdfReader
+        reader = PdfReader(file)
+        return "\n".join([page.extract_text() for page in reader.pages])
     # elif ext == '.docx':
     #     from docx import Document
     #     doc = Document(file)
@@ -128,7 +131,7 @@ def upload_transcript():
 
         filename = secure_filename(file.filename) #type: ignore
         ext = os.path.splitext(filename)[1].lower()
-        allowed_exts = {'.txt', '.py'}
+        allowed_exts = {'.txt', '.py', '.md', '.pdf', '.docx', '.doc'}
 
         if ext not in allowed_exts:
             continue  # skip disallowed files

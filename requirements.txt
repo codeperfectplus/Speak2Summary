@@ -8,3 +8,4 @@ flask_sqlalchemy==3.1.1
 gunicorn==23.0.0
 elevenlabs==1.59.0
 flask_migrate==4.1.0
+pypdf2==3.0.1

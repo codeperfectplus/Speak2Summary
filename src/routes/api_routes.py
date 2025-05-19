@@ -37,6 +37,10 @@ def generate_mindmap_api():
     data = request.get_json()
     file_id = data.get("id")
 
+    llm_client = data.get("llm-client")
+    llm_model = data.get("llm-model")
+    
+
     if not file_id:
         return jsonify({"error": "Missing 'id' in request body"}), 400
 
@@ -51,11 +55,14 @@ def generate_mindmap_api():
     if not file_record.transcript:
         return jsonify({"error": "Transcript not found for this file"}), 400
 
+    if not llm_client or not llm_model:
+        return jsonify({"error": "Missing 'llm_client' or 'llm_model' in request body"}), 400
+
     # Generate the mind map
     mindmap_data = generate_mind_map_from_transcript(
         file_record.transcript,
-        llm_client=file_record.llm_client,
-        llm_model=file_record.llm_model
+        llm_client=llm_client,
+        llm_model=llm_model
     )
 
     file_record.mind_map = mindmap_data
@@ -70,7 +77,10 @@ def generate_mindmap_api():
 def generate_meeting_minutes_api():
     """API to generate meeting minutes from transcript"""
     data = request.get_json()
+
     file_id = data.get("id")
+    llm_client = data.get("llm-client")
+    llm_model = data.get("llm-model")
 
     if not file_id:
         return jsonify({"error": "Missing 'id' in request body"}), 400
@@ -85,12 +95,15 @@ def generate_meeting_minutes_api():
     
     if not file_record.transcript:
         return jsonify({"error": "Transcript not found for this file"}), 400
+
+    if not llm_client or not llm_model:
+        return jsonify({"error": "Missing 'llm_client' or 'llm_model' in request body"}), 400
     
     # Generate the meeting minutes
     meeting_minutes = generate_meeting_minutes_from_transcript(
         file_record.transcript,
-        llm_client=file_record.llm_client,
-        llm_model=file_record.llm_model
+        llm_client=llm_client,
+        llm_model=llm_model
     )
     
     meeting_minutes = render_minutes_with_tailwind(meeting_minutes)

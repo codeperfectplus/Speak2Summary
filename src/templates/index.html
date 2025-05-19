@@ -219,7 +219,7 @@
             </svg>
             <span class="text-xs text-primary-200">Choose transcript file</span>
         </label>
-        <input id="transcript-file" type="file" x-ref="fileInput" accept=".txt,.doc,.docx,.pdf"
+        <input id="transcript-file" type="file" x-ref="fileInput" accept=".txt,.doc,.docx,.pdf,.md,.py"
             class="hidden" @change="handleFileChange">
     </div>
 
@@ -931,12 +931,16 @@
                 this.buttonText = 'Generating...';
 
                 try {
+                    
+                    const llmModel = document.getElementById('llm-model')?.value || '';
+                    const llmcleint = llmModelToClient[llmModel] || '';
+
                     const response = await fetch('/api/generate_mindmap', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ id: file.id })
+                        body: JSON.stringify({ id: file.id , 'llm-client': llmcleint, 'llm-model': llmModel })
                     });
 
                     if (!response.ok) {
@@ -1013,11 +1017,15 @@
 
             const file = this.transcriptFile;
             const reader = new FileReader();
-
-            if (file.type === 'text/plain') {
+            if (
+                file.type === 'text/plain' ||
+                file.name.endsWith('.md') ||
+                file.type === 'text/markdown' ||
+                file.name.endsWith('.py')
+            ) {
                 reader.onload = () => {
                     this.transcriptText = reader.result;
-                    this.filePreview = "text/plain file loaded";
+                    this.filePreview = reader.result.slice(0, 2000); // limit preview to 2000 chars
                 };
                 reader.readAsText(file);
             } else if (file.name.endsWith('.pdf')) {
@@ -1097,10 +1105,13 @@
                 this.buttonText = 'Generating...';
 
                 try {
+                    const llmModel = document.getElementById('llm-model')?.value || '';
+                    const llmClient = llmModelToClient[llmModel] || '';
+                    
                     const response = await fetch('/api/generate_meeting_minutes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: file.id })
+                        body: JSON.stringify({ id: file.id, 'llm-client': llmClient, 'llm-model': llmModel })
                     });
 
                     const data = await response.json();
