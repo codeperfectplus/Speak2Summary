@@ -100,16 +100,19 @@ def generate_meeting_minutes_api():
         return jsonify({"error": "Missing 'llm_client' or 'llm_model' in request body"}), 400
     
     # Generate the meeting minutes
-    meeting_minutes = generate_meeting_minutes_from_transcript(
+    meeting_minutes_markdown = generate_meeting_minutes_from_transcript(
         file_record.transcript,
         llm_client=llm_client,
         llm_model=llm_model
     )
     
-    meeting_minutes = render_minutes_with_tailwind(meeting_minutes)
-    file_record.minutes = meeting_minutes
+    # minutes_raw
+    meeting_minutes_html = render_minutes_with_tailwind(meeting_minutes_markdown)
+
+    file_record.minutes_raw = meeting_minutes_markdown
+    file_record.minutes = meeting_minutes_html
     file_record.status = "completed"
     file_record.completion_time = datetime.utcnow()
     db.session.commit()
-    return jsonify({"message": "Meeting minutes generated successfully", "minutes": meeting_minutes}), 200
+    return jsonify({"message": "Meeting minutes generated successfully", "minutes": meeting_minutes_html}), 200
 

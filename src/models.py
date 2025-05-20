@@ -22,6 +22,7 @@ class TranscriptEntry(db.Model):
     
     # Store processing results
     transcript = db.Column(db.Text, nullable=True)
+    minutes_raw = db.Column(db.Text, nullable=True)
     minutes = db.Column(db.Text, nullable=True)
     
     # Error handling

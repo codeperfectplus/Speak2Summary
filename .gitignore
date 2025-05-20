@@ -177,3 +177,5 @@ logs/*
 *.db
 *.wav
 *.mp3
+*.index
+*.pkl
