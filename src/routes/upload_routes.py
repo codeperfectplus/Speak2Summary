@@ -37,7 +37,7 @@ def extract_text_from_file(file, ext):
         raise ValueError("Unsupported file type")
 
 
-def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, t_model, llm_client, llm_model):
+def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, t_model):
     new_file = TranscriptEntry(
         id=tracking_id, #type: ignore
         filename=original_filename, #type: ignore
@@ -45,8 +45,6 @@ def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, 
         status="queued", #type: ignore
         transcription_client=t_client, #type: ignore
         transcription_model=t_model, #type: ignore
-        llm_client=llm_client, #type: ignore
-        llm_model=llm_model #type: ignore
     )
     db.session.add(new_file)
     db.session.commit()
@@ -73,8 +71,6 @@ def upload():
     uploaded_files = request.files.getlist('audio')
     t_client = request.form.get('transcription-client')
     t_model = request.form.get('transcription-model')
-    llm_client = request.form.get('llm-client')
-    llm_model = request.form.get('llm-model')
 
     if not uploaded_files or uploaded_files[0].filename == '':
         return jsonify({'error': 'No selected file'}), 400
@@ -82,8 +78,8 @@ def upload():
     results = []
     for file in uploaded_files:
         tracking_id = str(uuid.uuid4())
-        path, original_name = save_file(file, tracking_id)
-        create_audio_file_entry(tracking_id, original_name, path, t_client, t_model, llm_client, llm_model)
+        filepath, original_name = save_file(file, tracking_id)
+        create_audio_file_entry(tracking_id, original_name, filepath, t_client, t_model)
         process_audio_file.delay(tracking_id, filepath, t_client, t_model) #type: ignore
         results.append({
             'id': tracking_id,
