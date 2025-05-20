@@ -1,8 +1,6 @@
 
-from math import e
 import os
 import uuid
-from datetime import datetime
 from venv import logger
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
@@ -34,10 +32,7 @@ def extract_text_from_file(file, ext):
         from PyPDF2 import PdfReader
         reader = PdfReader(file)
         return "\n".join([page.extract_text() for page in reader.pages])
-    # elif ext == '.docx':
-    #     from docx import Document
-    #     doc = Document(file)
-    #     return "\n".join([para.text for para in doc.paragraphs])
+
     else:
         raise ValueError("Unsupported file type")
 
@@ -69,11 +64,6 @@ def create_text_file_entry(tracking_id, original_filename, filepath, llm_client,
     db.session.add(new_file)
     db.session.commit()
 
-def add_to_audio_processing_queue(tracking_id, filepath, t_client, t_model, llm_client, llm_model):
-    process_audio_file.delay(tracking_id, filepath, t_client, t_model, llm_client, llm_model) #type: ignore
-
-def add_to_transcript_processing_queue(tracking_id, content, llm_client, llm_model):
-    process_transcript_file.delay(tracking_id, content, llm_client, llm_model) #type: ignore
 
 @audio_bp.route('/upload', methods=['POST'])
 def upload():
@@ -94,7 +84,7 @@ def upload():
         tracking_id = str(uuid.uuid4())
         path, original_name = save_file(file, tracking_id)
         create_audio_file_entry(tracking_id, original_name, path, t_client, t_model, llm_client, llm_model)
-        add_to_audio_processing_queue(tracking_id, path, t_client, t_model, llm_client, llm_model)
+        process_audio_file.delay(tracking_id, filepath, t_client, t_model) #type: ignore
         results.append({
             'id': tracking_id,
             'filename': original_name,
@@ -121,7 +111,7 @@ def upload_transcript():
     if transcript_text:
         tracking_id = str(uuid.uuid4())
         create_text_file_entry(tracking_id, 'pasted_transcript.txt', '', llm_client, llm_model, transcript_text)
-        add_to_transcript_processing_queue(tracking_id, transcript_text, llm_client, llm_model)
+        process_transcript_file.delay(tracking_id) #type: ignore
         processed_ids.append({'id': tracking_id, 'source': 'text'})
 
     # Handle uploaded files
@@ -148,7 +138,7 @@ def upload_transcript():
 
         tracking_id = str(uuid.uuid4())
         create_text_file_entry(tracking_id, filename, '', llm_client, llm_model, content)
-        add_to_transcript_processing_queue(tracking_id, content, llm_client, llm_model)
+        process_transcript_file.delay(tracking_id) #type: ignore
         processed_ids.append({'id': tracking_id, 'source': 'file', 'filename': filename})
 
     if not processed_ids:
