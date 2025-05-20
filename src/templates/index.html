@@ -9,21 +9,26 @@
     <meta name="keywords" content="TransMeet, Meeting Minutes, Audio Transcription, AI">
     <meta name="theme-color" content="#4f46e5">
     <title>TransMeet - Meeting Minutes Generator</title>
-    
+
     <link rel="icon" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-16.png') }}" type="image/png">
     <link rel="icon" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-32.png') }}" type="image/png">
-    
+
     <link rel="icon" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-70.png') }}" type="image/png">
     <link rel="icon" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-96.png') }}" type="image/png">
-    <link rel="apple-touch-icon" sizes="57x57" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-57.png') }}">
-    <link rel="apple-touch-icon" sizes="60x60" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-60.png') }}">
-    <link rel="apple-touch-icon" sizes="72x72" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-72.png') }}">
-    <link rel="apple-touch-icon" sizes="76x76" href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-76.png') }}">
+    <link rel="apple-touch-icon" sizes="57x57"
+        href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-57.png') }}">
+    <link rel="apple-touch-icon" sizes="60x60"
+        href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-60.png') }}">
+    <link rel="apple-touch-icon" sizes="72x72"
+        href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-72.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76"
+        href="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-76.png') }}">
 
     <meta name="apple-mobile-web-app-title" content="TransMeet">
     <meta name="application-name" content="TransMeet">
     <meta name="msapplication-TileColor" content="#4f46e5">
-    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-144.png') }}">
+    <meta name="msapplication-TileImage"
+        content="{{ url_for('static', filename='favicon/icons8-mic-3d-fluency-144.png') }}">
 
     <title>TransMeet - Meeting Minutes Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -78,7 +83,7 @@
             }
         }
     </script>
- 
+
 
 </head>
 
@@ -101,180 +106,220 @@
             </div>
 
             <!-- Upload Audio Section -->
-            <div class="mb-5 bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
-                <h3 class="text-primary-100 text-sm font-medium mb-3 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-accent-400" fill="none"
-                        viewBox="0 0 20 20" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
-                    Upload Audio Files
-                </h3>
+            <div x-data="{ open: true, dragover: false }" class="mb-5">
+                <div class="bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
+                    <!-- Toggle Header -->
+                    
 
-                <div class="relative border-2 border-dashed border-primary-500/40 rounded-lg p-6 text-center cursor-pointer transition-all hover:border-accent-400 group"
-                    x-on:dragover.prevent="dragover = true" x-on:dragleave.prevent="dragover = false"
-                    x-on:drop.prevent="dragover = false; handleFileDrop($event);"
-                    x-bind:class="{'bg-accent-500/10 border-accent-400': dragover}"
-                    x-on:click="$refs.fileInput.click()">
+                    <h3 @click="open = !open"
+                        class="text-primary-100 text-sm font-medium mb-2 flex items-center justify-between cursor-pointer">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-accent-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            Upload Audio Files
+                        </div>
+                        <svg :class="{'rotate-180': open}" class="h-4 w-4 text-primary-400 transition-transform"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </h3>
 
-                    <input type="file" x-ref="fileInput" multiple accept="audio/*" class="hidden"
-                        x-on:change="handleFileChange">
+                    <!-- Content -->
+                    <div x-show="open" x-transition>
+                        <div class="relative border-2 border-dashed border-primary-500/40 rounded-lg p-6 text-center cursor-pointer transition-all hover:border-accent-400 group"
+                            x-on:dragover.prevent="dragover = true" x-on:dragleave.prevent="dragover = false"
+                            x-on:drop.prevent="dragover = false; handleFileDrop($event);"
+                            x-bind:class="{'bg-accent-500/10 border-accent-400': dragover}"
+                            x-on:click="$refs.fileInput.click()">
 
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="h-10 w-10 mx-auto text-primary-300 mb-2 group-hover:text-accent-400 transition-colors"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p class="text-primary-200 text-sm">Drag & drop audio files here<br>or click to select</p>
-                </div>
+                            <input type="file" x-ref="fileInput" multiple accept="audio/*" class="hidden"
+                                x-on:change="handleFileChange">
 
-                <!-- Selected files preview -->
-                <div x-show="selectedFiles.length > 0" class="mt-3">
-                    <h4 class="text-primary-200 text-xs mb-2 font-medium">Selected Files (<span
-                            x-text="selectedFiles.length"></span>)</h4>
-                    <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
-                        <template x-for="(file, index) in selectedFiles" :key="index">
-                            <div
-                                class="flex items-center justify-between bg-primary-700/40 p-2 rounded-md hover:bg-primary-700/60 transition-colors">
-                                <div class="flex items-center overflow-hidden">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="h-3.5 w-3.5 mr-2 text-accent-400 shrink-0" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                                    </svg>
-                                    <span class="text-xs text-primary-100 truncate" x-text="file.name"></span>
-                                </div>
-                                <button @click.prevent="removeFile(index)"
-                                    class="text-primary-400 hover:text-accent-300 ml-2 p-1 rounded-full hover:bg-primary-600/40">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-10 w-10 mx-auto text-primary-300 mb-2 group-hover:text-accent-400 transition-colors"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p class="text-primary-200 text-sm">Drag & drop audio files here<br>or click to select</p>
+                        </div>
+
+                        <!-- Selected files preview -->
+                        <div x-show="selectedFiles.length > 0" class="mt-3">
+                            <h4 class="text-primary-200 text-xs mb-2 font-medium">Selected Files (<span
+                                    x-text="selectedFiles.length"></span>)</h4>
+                            <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                                <template x-for="(file, index) in selectedFiles" :key="index">
+                                    <div
+                                        class="flex items-center justify-between bg-primary-700/40 p-2 rounded-md hover:bg-primary-700/60 transition-colors">
+                                        <div class="flex items-center overflow-hidden">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                class="h-3.5 w-3.5 mr-2 text-accent-400 shrink-0" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                            </svg>
+                                            <span class="text-xs text-primary-100 truncate" x-text="file.name"></span>
+                                        </div>
+                                        <button @click.prevent="removeFile(index)"
+                                            class="text-primary-400 hover:text-accent-300 ml-2 p-1 rounded-full hover:bg-primary-600/40">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
                             </div>
-                        </template>
-                    </div>
-                </div>
+                        </div>
 
-                <button x-on:click="uploadFiles" x-bind:disabled="selectedFiles.length === 0 || uploading" x-bind:class="{
+                        <!-- Upload button -->
+                        <button x-on:click="uploadFiles" x-bind:disabled="selectedFiles.length === 0 || uploading"
+                            x-bind:class="{
                 'opacity-50 cursor-not-allowed': selectedFiles.length === 0 || uploading, 
                 'hover:bg-accent-500 hover:shadow-lg hover:shadow-accent-600/20': selectedFiles.length > 0 && !uploading
             }" class="w-full bg-accent-600 text-white px-4 py-2.5 rounded-lg mt-3
             transition-all transform font-medium text-sm">
-                    <div class="flex items-center justify-center">
-                        <template x-if="!uploading">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                        </template>
-                        <template x-if="uploading">
-                            <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4">
-                                </circle>
-                                <path class="opacity-75" fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                </path>
-                            </svg>
-                        </template>
-                        <span x-text="uploading ? 'Processing...' : 'Process Audio Files'"></span>
+                            <div class="flex items-center justify-center">
+                                <template x-if="!uploading">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                </template>
+                                <template x-if="uploading">
+                                    <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4">
+                                        </circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                </template>
+                                <span x-text="uploading ? 'Processing...' : 'Process Audio Files'"></span>
+                            </div>
+                        </button>
                     </div>
-                </button>
+                </div>
             </div>
+
 
             <!-- Upload Transcript Section -->
-            <div class="mb-5 bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
-                <h3 class="text-primary-100 text-sm font-medium mb-2 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-accent-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Upload/Copy Transcript
-                </h3>
-                <p class="text-primary-300 text-xs mb-3">Paste your transcript text or upload a transcript file</p>
+            <div x-data="{ openTranscript: false }"
+                class="mb-5 bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
 
-                <form x-data="transcriptUploadForm()" class="space-y-3"
-    @showToastMessage.window="showToastMessage($event.detail.message, $event.detail.type)">
-    
-    <!-- textarea -->
-    <textarea x-model="transcriptText" rows="3" placeholder="Paste transcript text here..."
-        class="w-full rounded-md bg-primary-700/50 text-white text-sm px-3 py-2 border border-primary-600/30 focus:ring-2 focus:ring-accent-400/50 focus:border-accent-400 focus:outline-none placeholder-primary-400 mb-3">
-    </textarea>
-
-    <!-- file upload -->
-    <div class="mb-3">
-        <label for="transcript-file"
-            class="flex items-center justify-center w-full px-3 py-2 border border-primary-600/30 rounded-md cursor-pointer bg-primary-700/30 hover:bg-primary-700/50 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary-300" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-            </svg>
-            <span class="text-xs text-primary-200">Choose transcript file</span>
-        </label>
-        <input id="transcript-file" type="file" x-ref="fileInput" accept=".txt,.doc,.docx,.pdf,.md,.py"
-            class="hidden" @change="handleFileChange">
-    </div>
-
-    <!-- File name + preview (if applicable) -->
-    <template x-if="selectedFileName">
-        <div class="text-primary-400 text-xs space-y-1">
-            <p><strong>Selected:</strong> <span x-text="selectedFileName"></span></p>
-            <template x-if="filePreview">
-                <pre class="bg-primary-900 text-primary-300 p-2 rounded max-h-40 overflow-y-auto whitespace-pre-wrap text-xs" x-text="filePreview"></pre>
-            </template>
-        </div>
-    </template>
-
-    <!-- submit -->
-    <button type="button" @click="submitTranscript" :disabled="uploading"
-        class="w-full bg-accent-600 text-white px-4 py-2.5 rounded-lg transition-all transform font-medium text-sm"
-        :class="{ 'opacity-50 cursor-not-allowed': uploading, 'hover:bg-accent-500 hover:shadow-lg hover:shadow-accent-600/20': !uploading }">
-        <div class="flex items-center justify-center">
-            <template x-if="!uploading">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-            </template>
-            <template x-if="uploading">
-                <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                </svg>
-            </template>
-            <span x-text="uploading ? 'Processing...' : 'Upload Transcript'"></span>
-        </div>
-    </button>
-</form>
-
-            </div>
-
-
-            <!-- Transcription Settings Form -->
-            <div x-data="transcriptionSettings" x-init="init()" class="mb-5">
-                <div class="bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
-                    <h3 class="text-primary-100 text-sm font-medium mb-3 flex items-center">
+                <!-- Header (Toggle Button) -->
+                <h3 @click="openTranscript = !openTranscript"
+                    class="text-primary-100 text-sm font-medium mb-2 flex items-center justify-between cursor-pointer">
+                    <div class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-accent-400" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        AI Settings
-                    </h3>
+                        Upload/Copy Transcript
+                    </div>
+                    <svg :class="{'rotate-180': openTranscript}" class="h-4 w-4 text-primary-400 transition-transform"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </h3>
 
-                    <div class="space-y-4">
+                <!-- Description -->
+                <p x-show="openTranscript" x-transition class="text-primary-300 text-xs mb-3">Paste your transcript text
+                    or upload a transcript file</p>
+
+                <!-- Form Section -->
+                <form x-show="openTranscript" x-transition x-data="transcriptUploadForm()" class="space-y-3"
+                    @showToastMessage.window="showToastMessage($event.detail.message, $event.detail.type)">
+
+                    <!-- textarea -->
+                    <textarea x-model="transcriptText" rows="3" placeholder="Paste transcript text here..."
+                        class="w-full rounded-md bg-primary-700/50 text-white text-sm px-3 py-2 border border-primary-600/30 focus:ring-2 focus:ring-accent-400/50 focus:border-accent-400 focus:outline-none placeholder-primary-400 mb-3">
+        </textarea>
+
+                    <!-- file upload -->
+                    <div class="mb-3">
+                        <label for="transcript-file"
+                            class="flex items-center justify-center w-full px-3 py-2 border border-primary-600/30 rounded-md cursor-pointer bg-primary-700/30 hover:bg-primary-700/50 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary-300" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                            <span class="text-xs text-primary-200">Choose transcript file</span>
+                        </label>
+                        <input id="transcript-file" type="file" x-ref="fileInput" accept=".txt,.doc,.docx,.pdf,.md,.py"
+                            class="hidden" @change="handleFileChange">
+                    </div>
+
+                    <!-- File name + preview -->
+                    <template x-if="selectedFileName">
+                        <div class="text-primary-400 text-xs space-y-1">
+                            <p><strong>Selected:</strong> <span x-text="selectedFileName"></span></p>
+                            <template x-if="filePreview">
+                                <pre class="bg-primary-900 text-primary-300 p-2 rounded max-h-40 overflow-y-auto whitespace-pre-wrap text-xs"
+                                    x-text="filePreview"></pre>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- submit -->
+                    <button type="button" @click="submitTranscript" :disabled="uploading"
+                        class="w-full bg-accent-600 text-white px-4 py-2.5 rounded-lg transition-all transform font-medium text-sm"
+                        :class="{ 'opacity-50 cursor-not-allowed': uploading, 'hover:bg-accent-500 hover:shadow-lg hover:shadow-accent-600/20': !uploading }">
+                        <div class="flex items-center justify-center">
+                            <template x-if="!uploading">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                            </template>
+                            <template x-if="uploading">
+                                <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4" />
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                            </template>
+                            <span x-text="uploading ? 'Processing...' : 'Upload Transcript'"></span>
+                        </div>
+                    </button>
+                </form>
+            </div>
+
+
+
+            <!-- Transcription Settings Form -->
+            <div x-data="{ open: false }" class="mb-5">
+                <div class="bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
+                    <div @click="open = !open" class="cursor-pointer select-none flex items-center justify-between">
+                        <h3 class="text-primary-100 text-sm font-medium flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-accent-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            AI Settings
+                        </h3>
+                        <svg :class="{ 'rotate-180': open }"
+                            class="h-4 w-4 text-primary-300 transition-transform duration-200" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+
+                    <div x-show="open" x-transition class="mt-4 space-y-4">
                         <!-- Transcription Model -->
                         <div class="flex flex-col gap-1.5">
                             <label for="transcription-model"
@@ -293,13 +338,6 @@
                                     <option :value="model" x-text="model"></option>
                                 </template>
                             </select>
-                            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                <svg class="h-4 w-4 text-primary-300" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </div>
                         </div>
 
                         <!-- LLM Model -->
@@ -322,6 +360,7 @@
                     </div>
                 </div>
             </div>
+
 
             <!-- Footer -->
             <div class="mt-auto pt-4 border-t border-primary-700/30">
@@ -473,8 +512,7 @@
 
                                                 <!-- Show filename only if root topic is available -->
                                                 <div class="text-sm text-gray-500 truncate max-w-xs"
-                                                    x-show="file.mind_map && file.topic"
-                                                    x-text="file.filename">
+                                                    x-show="file.mind_map && file.topic" x-text="file.filename">
                                                 </div>
 
                                                 <!-- Upload time -->
@@ -589,20 +627,23 @@
                                         </a> -->
 
                                         <!-- Mind Map Download / View -->
-                                        <div x-data="mindmapButton(file)">
-                                            <a :href="hasMindMap ? buttonHref : '#'" @click.prevent="handleClick"
-                                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
-                                                :class="{ 'pointer-events-none': isGenerating }">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-4 w-4 mr-2 group-hover:animate-pulse" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <span x-text="buttonText"></span>
-                                            </a>
-                                        </div>
+<div x-data="mindmapButton(file)">
+    <a :href="hasMindMap || generatedNow ? buttonHref : '#'"
+       @click="handleClick"
+       class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors group"
+       :class="{ 'pointer-events-none opacity-50 cursor-not-allowed': isGenerating }">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="h-4 w-4 mr-2 group-hover:animate-pulse" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span x-text="buttonText"></span>
+    </a>
+</div>
+
+
 
                                         <!-- Delete Button with Confirmation -->
                                         <div x-data="{ confirmDelete: false }" class="relative">
@@ -650,9 +691,10 @@
                                     d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                             </svg>
                         </div>
-                        <h2 class="text-2xl font-semibold mb-3 text-secondary-800">No Audio Files Uploaded</h2>
-                        <p class="mb-8 text-secondary-600">Upload an audio recording of your meeting to automatically
-                            generate minutes</p>
+                        <h2 class="text-2xl font-semibold mb-3 text-secondary-800">All Set!, Ready to Start?</h2>
+                        <p class="mb-8 text-secondary-600">Upload an audio/text/pdf file to get started with
+                            transcription,
+                            meeting minutes, and mind map generation.</p>
                     </div>
                 </div>
             </div>
@@ -907,65 +949,60 @@
     }
 
     function mindmapButton(file) {
-        return {
-            isGenerating: false,
-            hasMindMap: file.mind_map !== null,
-            generatedNow: false,
-            buttonText: file.mind_map ? 'View Mindmap' : 'Generate Mindmap',
-            buttonHref: `/mindmap?id=${file.id}`,
+    return {
+        isGenerating: false,
+        hasMindMap: !!file.mind_map,
+        generatedNow: false,
+        buttonText: file.mind_map ? 'View Mindmap' : 'Generate Mindmap',
+        buttonHref: `/mindmap?id=${file.id}`,
 
-            async handleClick() {
-                if (this.hasMindMap) {
-                    // Redirect only if already generated
-                    window.location.href = this.buttonHref;
-                    return;
-                }
+        async handleClick(event) {
+            // If already has mindmap, allow normal redirect
+            if (this.hasMindMap || this.generatedNow) return;
 
-                if (this.generatedNow) {
-                    // User clicked again after generation
-                    window.location.href = this.buttonHref;
-                    return;
-                }
+            // Prevent navigation if generating
+            event.preventDefault();
 
-                this.isGenerating = true;
-                this.buttonText = 'Generating...';
+            this.isGenerating = true;
+            this.buttonText = 'Generating...';
 
-                try {
-                    
-                    const llmModel = document.getElementById('llm-model')?.value || '';
-                    const llmcleint = llmModelToClient[llmModel] || '';
+            try {
+                const llmModel = document.getElementById('llm-model')?.value || '';
+                const llmClient = llmModelToClient?.[llmModel] || '';
 
-                    const response = await fetch('/api/generate_mindmap', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ id: file.id , 'llm-client': llmcleint, 'llm-model': llmModel })
-                    });
+                const response = await fetch('/api/generate_mindmap', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: file.id,
+                        'llm-client': llmClient,
+                        'llm-model': llmModel
+                    })
+                });
 
-                    if (!response.ok) {
-                        const error = await response.json();
-                        alert('Error: ' + error.error);
-                        this.buttonText = 'Generate Mindmap';
-                        this.isGenerating = false;
-                        return;
-                    }
-
-                    // On success, update status
-                    this.hasMindMap = true;
-                    this.generatedNow = true;
-                    this.buttonText = 'View Mindmap';
-                    this.isGenerating = false;
-
-                } catch (err) {
-                    console.error(err);
-                    alert('Something went wrong.');
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Error: ' + (error.error || 'Unknown error'));
                     this.buttonText = 'Generate Mindmap';
                     this.isGenerating = false;
+                    return;
                 }
+
+                this.hasMindMap = true;
+                this.generatedNow = true;
+                this.buttonText = 'View Mindmap';
+                this.isGenerating = false;
+
+            } catch (err) {
+                console.error(err);
+                alert('Something went wrong.');
+                this.buttonText = 'Generate Mindmap';
+                this.isGenerating = false;
             }
         }
-    }
+    };
+}
+
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('transcriptionSettings', () => ({
@@ -1000,93 +1037,93 @@
             }
         }));
     });
-   function transcriptUploadForm() {
-    return {
-        transcriptText: '',
-        transcriptFile: null,
-        filePreview: '',
-        selectedFileName: '',
-        uploading: false,
+    function transcriptUploadForm() {
+        return {
+            transcriptText: '',
+            transcriptFile: null,
+            filePreview: '',
+            selectedFileName: '',
+            uploading: false,
 
-        handleFileChange(e) {
-            this.transcriptFile = e.target.files[0];
-            this.selectedFileName = this.transcriptFile?.name || '';
-            this.filePreview = '';
-
-            if (!this.transcriptFile) return;
-
-            const file = this.transcriptFile;
-            const reader = new FileReader();
-            if (
-                file.type === 'text/plain' ||
-                file.name.endsWith('.md') ||
-                file.type === 'text/markdown' ||
-                file.name.endsWith('.py')
-            ) {
-                reader.onload = () => {
-                    this.transcriptText = reader.result;
-                    this.filePreview = reader.result.slice(0, 2000); // limit preview to 2000 chars
-                };
-                reader.readAsText(file);
-            } else if (file.name.endsWith('.pdf')) {
-                this.filePreview = 'pdf file loaded';
-            } else if (file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
-                this.filePreview = 'docx file loaded';
-            } else {
-                this.filePreview = 'Unsupported file type';
-            }
-        },
-
-        async submitTranscript() {
-            this.uploading = true;
-
-            const formData = new FormData();
-
-            if (this.transcriptFile) {
-                formData.append('transcript_file', this.transcriptFile);
-            } else if (this.transcriptText.trim()) {
-                formData.append('transcript_text', this.transcriptText.trim());
-            } else {
-                alert('Please paste text or select a file.');
-                this.uploading = false;
-                return;
-            }
-
-            // Get selected model values
-            const llmModel = document.getElementById('llm-model')?.value || '';
-            const llmClient = llmModelToClient[llmModel] || '';
-
-            formData.append('llm-model', llmModel);
-            formData.append('llm-client', llmClient);
-
-            try {
-                const response = await fetch('/upload_transcript', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error('Upload failed');
-
-                this.transcriptText = '';
-                this.transcriptFile = null;
-                this.selectedFileName = '';
+            handleFileChange(e) {
+                this.transcriptFile = e.target.files[0];
+                this.selectedFileName = this.transcriptFile?.name || '';
                 this.filePreview = '';
-                this.$refs.fileInput.value = '';
 
-                window.dispatchEvent(new CustomEvent('showToastMessage', {
-                    detail: {
-                        message: 'Transcript uploaded successfully',
-                        type: 'success'
-                    }
-                }));
-            } catch (e) {
-                alert('Error uploading transcript.');
+                if (!this.transcriptFile) return;
+
+                const file = this.transcriptFile;
+                const reader = new FileReader();
+                if (
+                    file.type === 'text/plain' ||
+                    file.name.endsWith('.md') ||
+                    file.type === 'text/markdown' ||
+                    file.name.endsWith('.py')
+                ) {
+                    reader.onload = () => {
+                        this.transcriptText = reader.result;
+                        this.filePreview = reader.result.slice(0, 2000); // limit preview to 2000 chars
+                    };
+                    reader.readAsText(file);
+                } else if (file.name.endsWith('.pdf')) {
+                    this.filePreview = 'pdf file loaded';
+                } else if (file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
+                    this.filePreview = 'docx file loaded';
+                } else {
+                    this.filePreview = 'Unsupported file type';
+                }
+            },
+
+            async submitTranscript() {
+                this.uploading = true;
+
+                const formData = new FormData();
+
+                if (this.transcriptFile) {
+                    formData.append('transcript_file', this.transcriptFile);
+                } else if (this.transcriptText.trim()) {
+                    formData.append('transcript_text', this.transcriptText.trim());
+                } else {
+                    alert('Please paste text or select a file.');
+                    this.uploading = false;
+                    return;
+                }
+
+                // Get selected model values
+                const llmModel = document.getElementById('llm-model')?.value || '';
+                const llmClient = llmModelToClient[llmModel] || '';
+
+                formData.append('llm-model', llmModel);
+                formData.append('llm-client', llmClient);
+
+                try {
+                    const response = await fetch('/upload_transcript', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error('Upload failed');
+
+                    this.transcriptText = '';
+                    this.transcriptFile = null;
+                    this.selectedFileName = '';
+                    this.filePreview = '';
+                    this.$refs.fileInput.value = '';
+
+                    window.dispatchEvent(new CustomEvent('showToastMessage', {
+                        detail: {
+                            message: 'Transcript uploaded successfully',
+                            type: 'success'
+                        }
+                    }));
+                } catch (e) {
+                    alert('Error uploading transcript.');
+                }
+
+                this.uploading = false;
             }
-
-            this.uploading = false;
-        }
-    };
-}
+        };
+    }
 
     function minutesButtonComponent(file) {
         return {
@@ -1107,7 +1144,7 @@
                 try {
                     const llmModel = document.getElementById('llm-model')?.value || '';
                     const llmClient = llmModelToClient[llmModel] || '';
-                    
+
                     const response = await fetch('/api/generate_meeting_minutes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
