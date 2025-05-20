@@ -361,14 +361,15 @@
                     x-show="!showTranscript && !loading" x-transition:enter="transition-opacity ease-out duration-300"
                     x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                     <template x-if="file.minutes">
-                        <div x-html="highlightSearchResults(file.minutes)"
-                            :class="darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'"
-                            class="rounded-lg transition-colors duration-300"></div>
+                        <div 
+                            x-html="highlightSearchResults(file.minutes)"
+                            class="rounded-lg transition-colors duration-300 bg-white dark:bg-gray-900 shadow-md px-8 py-6 my-6 mx-auto"
+                            style="margin-top:2rem; margin-bottom:2rem; max-width: 100%;">
+                        </div>
                     </template>
 
                     <template x-if="!file.minutes">
-                        <div class="flex flex-col items-center justify-center p-8 text-center rounded-lg border-2 border-dashed"
-                            :class="darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-300 text-gray-500'">
+                        <div class="flex flex-col items-center justify-center p-8 text-center rounded-lg border-2 border-dashed">
                             <i class="fa-regular fa-file-lines text-5xl mb-4 opacity-70"></i>
                             <h3 class="text-xl font-medium mb-2">No meeting minutes available</h3>
                             <p class="max-w-sm">Meeting minutes haven't been generated yet for this file. Please check
