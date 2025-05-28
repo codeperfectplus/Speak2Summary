@@ -1,3 +1,4 @@
+# cython: language_level=3
 from src.config import app
 from src.models import db
 from src.routes import audio_bp

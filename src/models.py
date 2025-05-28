@@ -1,3 +1,4 @@
+# cython: language_level=3
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 

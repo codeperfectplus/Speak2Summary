@@ -1,3 +1,4 @@
+# cython: language_level=3
 from markdown import markdown
 from bs4 import BeautifulSoup, Tag
 import re

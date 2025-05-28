@@ -1,3 +1,4 @@
+# cython: language_level=3
 from flask import Blueprint
 
 audio_bp = Blueprint('audio', __name__)

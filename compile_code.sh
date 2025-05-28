@@ -5,10 +5,11 @@ trap 'echo "❌ Error occurred. Exiting..."; exit 1' ERR
 
 # Constants
 readonly ROOT_DIRECTORY=$(pwd)
-readonly SOURCE_DIRECTORY="$ROOT_DIRECTORY/src"
 readonly COMPILED_CODE_DIRECTORY="$ROOT_DIRECTORY/compiled_code"
-readonly COMPILED_CODE_SOURCE_DIRECTORY="$COMPILED_CODE_DIRECTORY/src"
+readonly COMPILED_CODE_SOURCE_DIRECTORY="$COMPILED_CODE_DIRECTORY"
 
+# Comma-separated list of excluded Python files (relative to root, e.g., "main.py" or "tools/start.py")
+EXCLUDE_FILES=()
 
 log() {
     echo -e "\033[1;34m[INFO]\033[0m $*"
@@ -18,81 +19,93 @@ safe_copy() {
     cp -r "$1" "$2" || { echo "Error: Failed to copy $1"; exit 1; }
 }
 
-find_python_files() {
-    find "$SOURCE_DIRECTORY" -name '*.py' -print0
+icd_excluded() {
+    local rel_path="$1"
+    for excluded in "${EXCLUDE_FILES[@]}"; do
+        [[ "$rel_path" == "$excluded" ]] && return 0
+    done
+    return 1
 }
 
-find_c_files() {
-    find "$SOURCE_DIRECTORY" -name '*.c' -print0
+prepare_output_dirs() {
+    log "Preparing output directories..."
+    mkdir -p "$COMPILED_CODE_SOURCE_DIRECTORY"
+    find . -type d ! -path "./compiled_code*" \
+                  ! -path "*/.git*" \
+                  ! -path "*/__pycache__*" | while read -r dir; do
+        mkdir -p "$COMPILED_CODE_SOURCE_DIRECTORY/${dir#./}"
+    done
 }
 
-generate_c_files_parallel() {
-    log "Generating C files from Python in parallel..."
-    find_python_files | xargs -0 -n 1 -P "$(nproc)" -I {} bash -c '
-        f="{}"
-        if ! grep -q "# cython: language_level=" "$f"; then
-            echo "# cython: language_level=3" | cat - "$f" > tmp && mv tmp "$f"
+
+compile_python_files() {
+    log "Converting Python files to shared objects..."
+    find . -name '*.py' ! -path "./compiled_code/*" \
+                        ! -path "*/.git/*" \
+                        ! -path "*/__pycache__/*" | while read -r py_file; do
+        rel_path="${py_file#./}"
+        if is_excluded "$rel_path"; then
+            log "Excluded: $rel_path"
+            cp "$py_file" "$COMPILED_CODE_SOURCE_DIRECTORY/$rel_path"
+            continue
         fi
-        cython "$f" -o "${f%.py}.c"
-    '
+
+        if ! grep -q "# cython: language_level=" "$py_file"; then
+            echo "# cython: language_level=3" | cat - "$py_file" > tmp && mv tmp "$py_file"
+        fi
+
+        c_file="${py_file%.py}.c"
+        cython "$py_file" -o "$c_file"
+
+        output_dir="$(dirname "$COMPILED_CODE_SOURCE_DIRECTORY/$rel_path")"
+        base_name="$(basename "$py_file" .py)"
+        gcc -shared -o "$output_dir/$base_name.so" -fPIC $(python3 -m pybind11 --includes) "$c_file"
+
+        rm "$c_file"
+    done
 }
 
-compile_c_to_so_parallel() {
-    log "Compiling .c files to .so in parallel..."
-    find_c_files | xargs -0 -n 1 -P "$(nproc)" -I {} bash -c '
-        c_file="{}"
-        source_dir="'"$SOURCE_DIRECTORY"'"
-        output_dir="'"$COMPILED_CODE_SOURCE_DIRECTORY"'"
-        relative_path="${c_file#$source_dir/}"
-        output_subdir="$(dirname "$relative_path")"
-        mkdir -p "$output_dir/$output_subdir"
-        base_name="$(basename "$c_file" .c)"
-        gcc -shared -o "$output_dir/$output_subdir/$base_name.so" -fPIC $(python3 -m pybind11 --includes) "$c_file"
-    '
+is_excluded() {
+    local rel_path="$1"
+    for excluded in "${EXCLUDE_FILES[@]}"; do
+        [[ "$rel_path" == "$excluded" ]] && return 0
+    done
+    return 1
 }
 
-copy_files() {
-    log "Copying project files..."
-    safe_copy requirements.txt "$COMPILED_CODE_DIRECTORY"
-    safe_copy Dockerfile "$COMPILED_CODE_DIRECTORY"
-    safe_copy docker-compose.yml "$COMPILED_CODE_DIRECTORY"
-    safe_copy run.sh "$COMPILED_CODE_DIRECTORY"
+
+copy_other_files() {
+    log "Copying non-Python files..."
+    find . -type f ! -name '*.py' ! -name '*.c' \
+        ! -path "./compiled_code/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/__pycache__/*" | while read -r file; do
+        rel_path="${file#./}"
+        target_path="$COMPILED_CODE_SOURCE_DIRECTORY/$rel_path"
+        mkdir -p "$(dirname "$target_path")"
+        cp "$file" "$target_path"
+    done
 }
 
+
+# Optional cleanup (build artifacts)
 cleanup() {
-    log "Cleaning up generated C files..."
-    find "$SOURCE_DIRECTORY" -name "*.c" -delete
+    log "Cleaning up temporary files..."
     rm -rf build
 }
 
 # Time tracking
-start_timer() {
-    date +%s.%N
-}
-
-elapsed_time() {
-    start=$1
-    end=$(date +%s.%N)
-    echo "$(echo "$end - $start" | bc)"
-}
+start_timer() { date +%s.%N; }
+elapsed_time() { echo "$(echo "$(date +%s.%N) - $1" | bc)"; }
 
 # ------------------ EXECUTION ------------------
 
-log "🚀 Build started..."
-
+log "🚀 Build started from current directory..."
+mkdir -p "$COMPILED_CODE_DIRECTORY"
 start=$(start_timer)
-copy_files
-log "✅ Files copied in $(elapsed_time "$start") seconds"
+prepare_output_dirs
+compile_python_files
+copy_other_files
+log "✅ Build completed in $(elapsed_time "$start") seconds"
 
-start=$(start_timer)
-generate_c_files_parallel
-log "✅ C files generated in $(elapsed_time "$start") seconds"
-
-start=$(start_timer)
-compile_c_to_so_parallel
-log "✅ Shared objects compiled in $(elapsed_time "$start") seconds"
-
-# Optional cleanup
-# cleanup
-
-log "🎉 Build completed successfully."
+log "🎉 Compiled project is in: $COMPILED_CODE_DIRECTORY"

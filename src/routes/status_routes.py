@@ -1,3 +1,4 @@
+# cython: language_level=3
 from flask import jsonify, url_for
 
 from src.config import redis_client

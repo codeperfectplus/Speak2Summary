@@ -1,3 +1,4 @@
+# cython: language_level=3
 # need to move into transmeet package
 from pydub import AudioSegment
 import noisereduce as nr

@@ -1,3 +1,4 @@
+# cython: language_level=3
 from flask import jsonify
 from datetime import datetime
 from flask import request, jsonify
