@@ -16,6 +16,8 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN touch /home/${USER}/.cache
+
 # Create a non-root user and set the user
 RUN groupadd -r celery && useradd -r -g celery celery
 

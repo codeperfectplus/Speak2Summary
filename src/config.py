@@ -17,7 +17,11 @@ MAX_CONTENT_LENGTH_MB = config_parser.getint('flask', 'MAX_CONTENT_LENGTH_MB')
 DB_NAME = config_parser.get('flask', 'SQLALCHEMY_DB_NAME')
 SQLALCHEMY_TRACK_MODIFICATIONS = config_parser.getboolean('flask', 'SQLALCHEMY_TRACK_MODIFICATIONS')
 
-SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), DB_NAME)}'
+# Create a 'database' directory inside 'src' if it doesn't exist
+database_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'database')
+os.makedirs(database_dir, exist_ok=True)
+
+SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(database_dir, DB_NAME)}"
 
 # Redis config values
 REDIS_HOST = config_parser.get('redis', 'HOST')

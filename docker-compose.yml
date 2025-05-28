@@ -16,7 +16,9 @@ services:
     networks:
       - transmeet-net
     volumes:
-      - .:/app
+      # - .:/app
+      - /home/${USER}/.cache/transmeet.db:/app/src/database/transmeet.db
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
@@ -40,7 +42,7 @@ services:
     networks:
       - transmeet-net
     volumes:
-      - .:/app
+      - /home/${USER}/.cache/:/app/src/database/transmeet.db
     labels:
       com.transmeet.service: "celery-worker"
 
