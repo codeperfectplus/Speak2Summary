@@ -21,4 +21,4 @@ def reduce_noise(input_path: str, output_path: str):
 
 
 if __name__ == "__main__":
-    reduce_noise("/home/admin/Downloads/fullteammeetingroadmapsyncmicrosoftteams_12_05_2025.wav", "clean_meeting_audio.wav")
+    reduce_noise("/home/admin/Downloads/meeting.wav", "clean_meeting_audio.wav")
