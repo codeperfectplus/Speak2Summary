@@ -48,7 +48,7 @@ def convert_to_jsmind(data):
     jsmind = {
         "meta": {
             "name": data.get("Root Topic", "Mind Map"),
-            "author": "TransMeet",
+            "author": "Speak2Summary",
             "version": "1.0",
             "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         },
@@ -148,6 +148,7 @@ def mindmap():
                                jsmind_data=json.dumps(jsmind_data),
                                map_title=root_title,
                                filename=filename,
+                               file_id=file_id,
                                creator_name = jsmind_data.get("meta", {}).get("author", "unknown"),
                                creation_date = jsmind_data.get("meta", {}).get("created_at", "unknown"),
         )

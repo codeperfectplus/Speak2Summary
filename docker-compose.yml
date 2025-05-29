@@ -1,6 +1,6 @@
 services:
   flask:
-    container_name: transmeet-flask
+    container_name: Speak2Summary-flask
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,10 +14,10 @@ services:
       - redis
     command: gunicorn -w 4 -b 0.0.0.0:5000 src.app:app --timeout 120
     networks:
-      - transmeet-net
+      - Speak2Summary-net
     volumes:
       # - .:/app
-      - /home/${USER}/.cache/transmeet.db:/app/src/database/transmeet.db
+      - /home/${USER}/.cache/Speak2Summary.db:/app/src/database/Speak2Summary.db
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
@@ -25,10 +25,10 @@ services:
       timeout: 10s
       retries: 5
     labels:
-      com.transmeet.service: "flask-backend"
+      com.Speak2Summary.service: "flask-backend"
 
   celery:
-    container_name: transmeet-celery
+    container_name: Speak2Summary-celery
     build:
       context: .
       dockerfile: Dockerfile
@@ -40,28 +40,28 @@ services:
     depends_on:
       - redis
     networks:
-      - transmeet-net
+      - Speak2Summary-net
     volumes:
-      - /home/${USER}/.cache/transmeet.db:/app/src/database/transmeet.db
+      - /home/${USER}/.cache/Speak2Summary.db:/app/src/database/Speak2Summary.db
     labels:
-      com.transmeet.service: "celery-worker"
+      com.Speak2Summary.service: "celery-worker"
 
   redis:
-    container_name: transmeet-redis
+    container_name: Speak2Summary-redis
     image: redis:7-alpine
     restart: always
     ports:
       - "6380:6379"
     networks:
-      - transmeet-net
+      - Speak2Summary-net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
     labels:
-      com.transmeet.service: "redis"
+      com.Speak2Summary.service: "redis"
 
 networks:
-  transmeet-net:
+  Speak2Summary-net:
     driver: bridge

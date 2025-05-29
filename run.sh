@@ -4,7 +4,7 @@ set -euo pipefail
 trap 'echo -e "\033[0;31m❌ Error occurred. Exiting...\033[0m"; exit 1' ERR
 
 # Constants
-CONTAINERS=("transmeet-flask" "transmeet-celery" "transmeet-redis")
+CONTAINERS=("Speak2Summary-flask" "Speak2Summary-celery" "Speak2Summary-redis")
 COMPILE_SCRIPT="./compile_code.sh"
 COMPILED_DIR="./compiled_code"
 COMPOSE_FILE="$COMPILED_DIR/docker-compose.yml"
@@ -55,7 +55,7 @@ cleanup() {
 
 # ------------------ MAIN ------------------
 
-log "🚀 Starting Transmeet deployment..."
+log "🚀 Starting Speak2Summary deployment..."
 
 stop_and_remove_containers
 run_compile_script
@@ -63,4 +63,4 @@ run_compile_script
 start_docker_compose
 
 # ping the :5000/health endpoint to ensure the service is up
-log "🎉 Transmeet started and cleaned up successfully!"
+log "🎉 Speak2Summary started and cleaned up successfully!"
