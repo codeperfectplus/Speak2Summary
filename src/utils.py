@@ -1,7 +1,6 @@
 # cython: language_level=3
 from markdown import markdown
 from bs4 import BeautifulSoup, Tag
-import re
 
 TAG_STYLES = {
     'h1': 'text-4xl font-extrabold text-indigo-800 mb-6 mt-8 scroll-mt-24 flex justify-between items-center',
@@ -27,89 +26,91 @@ TAG_STYLES = {
 
 HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 
-def wrap_collapsible(start_tag, soup):
+def wrap_collapsible_sections(soup):
     """
-    Wraps content under heading inside a collapsible div with toggle icon
+    For each heading (h1-h3), wrap all content until the next heading of same or higher level
+    inside a collapsible div.
     """
-    level = int(start_tag.name[1])
-    toggle_id = f"section-{id(start_tag)}"
-    content_div = soup.new_tag("div", **{'id': toggle_id, 'class': 'collapsible-content'})
+    for heading in soup.find_all(HEADING_TAGS):
+        level = int(heading.name[1])
+        toggle_id = f"section-{id(heading)}"
+        content_div = soup.new_tag("div", id=toggle_id, **{"class": "collapsible-content"})
 
-    next_sibling = start_tag.find_next_sibling()
-    while next_sibling and (
-        not isinstance(next_sibling, Tag)
-        or next_sibling.name not in HEADING_TAGS
-        or int(next_sibling.name[1]) > level
-    ):
-        temp = next_sibling
-        next_sibling = next_sibling.find_next_sibling()
-        content_div.append(temp.extract())
+        # Gather all siblings until the next heading of the same or higher level
+        sibling = heading.find_next_sibling()
+        while sibling:
+            # Stop if next heading of same or higher level
+            if sibling.name in HEADING_TAGS and int(sibling.name[1]) <= level:
+                break
+            next_sibling = sibling.find_next_sibling()
+            content_div.append(sibling.extract())
+            sibling = next_sibling
 
-    start_tag.insert_after(content_div)
+        # Only insert if we actually gathered content
+        if content_div.contents:
+            heading.insert_after(content_div)
 
-    # Add toggle button
-    toggle_button = soup.new_tag("button", **{
-        'class': 'toggle-button text-indigo-700 text-xl font-bold ml-2 focus:outline-none',
-        'onclick': f"toggleContent('{toggle_id}', this)"
-    })
-    toggle_button.string = '+'
-    start_tag.append(toggle_button)
+            # Add toggle button
+            toggle_button = soup.new_tag(
+                "button",
+                **{
+                    'class': 'toggle-button text-indigo-700 text-xl font-bold ml-2 focus:outline-none',
+                    'onclick': f"toggleContent('{toggle_id}', this)"
+                }
+            )
+            toggle_button.string = '+'
+            heading.append(toggle_button)
 
-def fix_nested_lists(soup):
-    for ul in soup.find_all(['ul', 'ol']):
-        for li in ul.find_all('li', recursive=False):
-            next_elem = li.find_next_sibling()
-            if next_elem and next_elem.name in ['ul', 'ol']:
-                nested_list = next_elem.extract()
-                li.append(nested_list)
-
-def process_nested_items(soup):
-    for li in soup.find_all('li'):
-        if li.strong and li.strong.text.strip().endswith(':'):
-            next_sibling = li.find_next_sibling()
-            sublist = soup.new_tag('ul', **{'class': TAG_STYLES['ul'].split()})
-            while next_sibling and next_sibling.name == 'li' and not next_sibling.strong:
-                temp = next_sibling
-                next_sibling = next_sibling.find_next_sibling()
-                sublist.append(temp.extract())
-            if sublist.find('li'):
-                li.append(sublist)
+def apply_tailwind_classes(soup):
+    for tag_name, classes in TAG_STYLES.items():
+        for el in soup.find_all(tag_name):
+            if tag_name == 'code' and el.parent.name == 'pre':
+                continue
+            existing_classes = el.get('class', [])
+            el['class'] = list(set(existing_classes + classes.split()))
+            if tag_name == 'a':
+                el['target'] = '_blank'
+                el['rel'] = 'noopener noreferrer'
 
 def handle_special_formatting(soup):
     for code in soup.find_all('code'):
         if code.parent.name != 'pre':
             code['class'] = TAG_STYLES['code'].split()
-    # Leave checkbox syntax unchanged
+    # Checkbox syntax left as is
+
+def group_labelled_list_items(soup):
+    for ul in soup.find_all(['ul', 'ol']):
+        li_list = ul.find_all('li', recursive=False)
+        i = 0
+        while i < len(li_list):
+            li = li_list[i]
+            if li.get_text(strip=True).endswith(':') and (not li.find('ul')):
+                sub_ul = soup.new_tag('ul')
+                j = i + 1
+                while j < len(li_list):
+                    next_li = li_list[j]
+                    if (next_li.find('strong', recursive=False) or 
+                        next_li.get_text(strip=True).endswith(':')):
+                        break
+                    sub_ul.append(next_li.extract())
+                    li_list.pop(j)
+                if sub_ul.contents:
+                    li.append(sub_ul)
+            i += 1
 
 def render_minutes_with_tailwind(md_text: str) -> str:
     html = markdown(md_text, extensions=['fenced_code', 'codehilite', 'tables', 'nl2br', 'extra'])
     soup = BeautifulSoup(html, 'html.parser')
 
-    fix_nested_lists(soup)
-    process_nested_items(soup)
+    group_labelled_list_items(soup)
+    wrap_collapsible_sections(soup)
     handle_special_formatting(soup)
-
-    for tag in soup.find_all(HEADING_TAGS):
-        level = int(tag.name[1])
-        if level <= 3:
-            wrap_collapsible(tag, soup)
-
-    for tag_name, class_list in TAG_STYLES.items():
-        for el in soup.find_all(tag_name):
-            if tag_name == 'code' and el.parent.name == 'pre':
-                continue
-            existing_classes = el.get('class', [])
-            el['class'] = list(set(existing_classes + class_list.split()))
-            if tag_name == 'a':
-                el['target'] = '_blank'
-                el['rel'] = 'noopener noreferrer'
-
+    apply_tailwind_classes(soup)
     return str(soup)
 
 if __name__ == "__main__":
     with open("data.md", "r") as f:
         md_text = f.read()
-
     html = render_minutes_with_tailwind(md_text)
     with open("output.html", "w") as f:
         f.write(html)
