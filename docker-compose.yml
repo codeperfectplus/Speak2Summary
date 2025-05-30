@@ -17,7 +17,7 @@ services:
       - Speak2Summary-net
     volumes:
       # - .:/app
-      - /home/${USER}/.cache/Speak2Summary.db:/app/src/database/Speak2Summary.db
+      - /home/${USER}/speak2summary/:/app/src/database/
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
@@ -42,7 +42,7 @@ services:
     networks:
       - Speak2Summary-net
     volumes:
-      - /home/${USER}/.cache/Speak2Summary.db:/app/src/database/Speak2Summary.db
+      - /home/${USER}/speak2summary/:/app/src/database/
     labels:
       com.Speak2Summary.service: "celery-worker"
 
