@@ -12,7 +12,8 @@ config_path = os.path.join(os.path.dirname(__file__), 'config.ini')
 config_parser.read(config_path)
 
 # Flask config values
-UPLOAD_FOLDER = config_parser.get('flask', 'UPLOAD_FOLDER')
+ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(ROOT_DIR, config_parser.get('flask', 'UPLOAD_FOLDER'))
 MAX_CONTENT_LENGTH_MB = config_parser.getint('flask', 'MAX_CONTENT_LENGTH_MB')
 DB_NAME = config_parser.get('flask', 'SQLALCHEMY_DB_NAME')
 SQLALCHEMY_TRACK_MODIFICATIONS = config_parser.getboolean('flask', 'SQLALCHEMY_TRACK_MODIFICATIONS')
