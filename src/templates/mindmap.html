@@ -55,6 +55,10 @@
               600: '#0492aa'
             },
             bg: '#f1f5f9'
+          },
+          animation: {
+            'bounce-gentle': 'bounce 1s infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
           }
         }
       }
@@ -65,135 +69,372 @@
   <script src="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/js/jsmind.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/style/jsmind.css" />
   <script src="https://cdn.jsdelivr.net/npm/jsmind@0.4.6/js/jsmind.screenshot.js"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/mindmap.css') }}" />
+  
+  <style>
+    /* Improved Mind Map Styling */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #f1f5f9;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .jsmind-node {
+      white-space: nowrap !important;
+      word-wrap: break-word;
+      word-break: break-word;
+      max-width: 220px;
+      padding: 8px 14px !important;
+      border-radius: 0.75rem !important;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1), 0 2px 4px rgba(37, 99, 235, 0.06) !important;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+      border: 1px solid rgba(37, 99, 235, 0.1) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      font-weight: 500 !important;
+      font-size: 13px !important;
+      color: #374151 !important;
+      position: relative !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    .jsmind-node:hover {
+      transform: translateY(-2px) scale(1.02) !important;
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(37, 99, 235, 0.1) !important;
+      background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
+      border-color: rgba(37, 99, 235, 0.2) !important;
+      z-index: 10 !important;
+    }
+
+    .jsmind-node.selected {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+      color: white !important;
+      border-color: #1e40af !important;
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3), 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+      transform: translateY(-2px) scale(1.05) !important;
+    }
+
+    .jsmind-node.selected:hover {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    }
+
+    /* Root node special styling */
+    .jsmind-node[data-nodeid="root"] {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+      color: white !important;
+      font-weight: 700 !important;
+      font-size: 16px !important;
+      padding: 12px 20px !important;
+      max-width: 280px !important;
+      border: none !important;
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3), 0 6px 16px rgba(99, 102, 241, 0.2) !important;
+    }
+
+    #jsmind_container {
+      width: calc(100vw - 320px);
+      height: calc(100vh - 80px);
+      min-height: 600px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 1rem;
+      box-shadow: 0 4px 32px rgba(37, 99, 235, 0.08), 0 2px 16px rgba(37, 99, 235, 0.04);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+      margin: 1rem;
+      border: 1px solid rgba(37, 99, 235, 0.08);
+    }
+
+    #jsmind_container:hover {
+      box-shadow: 0 8px 40px rgba(37, 99, 235, 0.12), 0 4px 20px rgba(37, 99, 235, 0.06);
+    }
+
+    /* Enhanced Tooltip */
+    .tooltip {
+      position: absolute;
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      color: white;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+      max-width: 300px;
+      word-wrap: break-word;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tooltip.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .tooltip::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 5px solid #1f2937;
+    }
+
+    /* Custom toggle switches */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(79, 70, 229, 0.2);
+      transition: 0.3s;
+      border-radius: 24px;
+      border: 1px solid rgba(79, 70, 229, 0.3);
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 2px;
+      background: white;
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    input:checked + .toggle-slider {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      border-color: #0891b2;
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Keyboard shortcuts indicator */
+    .shortcut-key {
+      display: inline-block;
+      padding: 2px 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Improved mind map lines */
+    .jsmind-line {
+      stroke: #2563eb !important;
+      stroke-width: 2 !important;
+      opacity: 0.8 !important;
+    }
+
+    /* Loading animation for export */
+    .loading-spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid white;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 
-<body class="bg-bg flex min-h-screen overflow-hidden">
-  <!-- Sidebar -->
-  <div class="w-72 bg-gradient-to-b from-primary-700 to-primary-900 text-white p-6 flex flex-col shadow-xl">
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 flex min-h-screen overflow-hidden">
+  <!-- Improved Sidebar -->
+  <div class="w-80 bg-gradient-to-br from-primary-700 via-primary-800 to-primary-900 text-white p-6 flex flex-col shadow-2xl border-r border-primary-600">
 
-    <div class="mb-6 flex items-center">
-      <div class="bg-accent-500/20 p-2 rounded-full mr-3">
+    <!-- Header -->
+    <div class="mb-8 flex items-center">
+      <div class="bg-gradient-to-br from-accent-400 to-accent-600 p-3 rounded-xl mr-4 shadow-lg">
         <span class="text-2xl">🎙️</span>
       </div>
       <div>
-        <a href="/" class="text-2xl font-bold flex items-center">
+        <a href="/" class="text-2xl font-bold flex items-center hover:text-accent-300 transition-colors">
           Speak2<span class="text-accent-400">Summary</span>
         </a>
-        <p class="text-primary-200 text-xs mt-0.5">Meeting Minutes Generator</p>
+        <p class="text-primary-200 text-xs mt-1 font-medium">Meeting Minutes Generator</p>
       </div>
     </div>
 
     <!-- Mind Map Controls -->
-    <div class="mb-6">
-      <div class="mb-5">
-        <label class="block text-primary-100 text-sm mb-2 font-medium">View Controls</label>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="jm.expand_all()"
-            class="bg-primary-800/50 hover:bg-primary-600/60 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+    <div class="mb-8">
+      <div class="mb-6">
+        <label class="block text-primary-100 text-sm mb-3 font-semibold uppercase tracking-wide">View Controls</label>
+        <div class="grid grid-cols-1 gap-3">
+          <button id="expand-all-btn"
+            class="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
             </svg>
-            Expand All
+            <span class="font-medium">Expand All</span>
+            <span class="shortcut-key">E</span>
           </button>
-          <button onclick="jm.collapse_all()"
-            class="bg-primary-800/50 hover:bg-primary-600/60 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
+          <button id="collapse-all-btn"
+            class="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7" />
             </svg>
-            Collapse All
+            <span class="font-medium">Collapse All</span>
+            <span class="shortcut-key">C</span>
+          </button>
+          <button id="center-map-btn"
+            class="bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-400 hover:to-accent-500 text-white px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18m9-9l-9-9-9 9" />
+            </svg>
+            <span class="font-medium">Center Map</span>
+            <span class="shortcut-key">F</span>
           </button>
         </div>
       </div>
 
-      <button id="export-btn" class="w-full bg-accent-600 text-white px-5 py-3 rounded-lg
-                transition-all transform hover:bg-accent-500 hover:scale-[1.02] hover:shadow-lg
-                flex items-center justify-center font-medium">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      <button id="export-btn" class="w-full bg-gradient-to-r from-accent-600 to-accent-700 text-white px-5 py-4 rounded-xl
+                transition-all duration-300 transform hover:from-accent-500 hover:to-accent-600 hover:scale-105 hover:shadow-xl
+                flex items-center justify-center font-semibold shadow-lg group">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
         <span>Export Mind Map</span>
       </button>
     </div>
 
-    <!-- Options Panel -->
-    <div class="bg-primary-800/50 rounded-lg p-4 mt-2">
-      <h3 class="text-primary-200 text-sm uppercase font-semibold mb-3">Options</h3>
+    <!-- Enhanced Options Panel -->
+    <div class="bg-gradient-to-br from-primary-800/50 to-primary-900/50 rounded-xl p-5 backdrop-blur-sm border border-primary-600/30">
+      <h3 class="text-primary-200 text-sm uppercase font-bold mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+        </svg>
+        Options
+      </h3>
 
-      <div class="space-y-3">
+      <div class="space-y-4">
         <!-- Auto Focus Toggle -->
         <div class="flex items-center justify-between">
-          <label for="auto-focus" class="text-sm">Auto-focus Selected</label>
-          <div class="relative inline-block w-10 align-middle select-none">
-            <input type="checkbox" id="auto-focus" checked class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
-                       checked:right-0 checked:border-accent-500 transition-all duration-200" />
-            <label for="auto-focus"
-              class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
+          <label for="auto-focus" class="text-sm font-medium flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Auto-focus Selected
+          </label>
+          <div class="toggle-switch">
+            <input type="checkbox" id="auto-focus" checked>
+            <span class="toggle-slider"></span>
           </div>
         </div>
 
         <!-- Show Tooltip Toggle -->
         <div class="flex items-center justify-between">
-          <label for="show-tooltip" class="text-sm">Show Node Tooltip</label>
-          <div class="relative inline-block w-10 align-middle select-none">
-            <input type="checkbox" id="show-tooltip" checked class="absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer
-                       checked:right-0 checked:border-accent-500 transition-all duration-200" />
-            <label for="show-tooltip"
-              class="block overflow-hidden h-6 rounded-full bg-primary-500/30 cursor-pointer"></label>
+          <label for="show-tooltip" class="text-sm font-medium flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Show Node Tooltip
+          </label>
+          <div class="toggle-switch">
+            <input type="checkbox" id="show-tooltip" checked>
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keyboard Shortcuts Info -->
+      <div class="mt-6 pt-4 border-t border-primary-600/30">
+        <h4 class="text-xs uppercase font-bold text-primary-300 mb-2">Keyboard Shortcuts</h4>
+        <div class="text-xs text-primary-300 space-y-1">
+          <div class="flex justify-between">
+            <span>Expand All</span>
+            <span class="shortcut-key">E</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Collapse All</span>
+            <span class="shortcut-key">C</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Center Map</span>
+            <span class="shortcut-key">F</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Navigate</span>
+            <span class="shortcut-key">←→</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="mt-auto">
-      <div class="flex items-center text-primary-300 text-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <!-- Footer -->
+    <div class="mt-auto pt-6">
+      <div class="flex items-center text-primary-300 text-sm mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span>Need help? <a href="#" class="underline text-primary-200">Click here</a></span>
+        <span>Need help? <a href="#" class="underline text-accent-300 hover:text-accent-200 transition-colors">Click here</a></span>
       </div>
-      <div class="text-xs text-primary-400 mt-2">
+      <div class="text-xs text-primary-400">
         © 2025 MindMapper - All rights reserved
       </div>
     </div>
   </div>
 
   <!-- Main Mind Map Container -->
-  <!-- filename and other details about the mind map -->
-
-
-
- <main class="flex-1">
-  <div class="flex items-center justify-between bg-white shadow-md p-4 w-full">
-    <!-- Left side: Title and filename -->
-    <div>
-      <h1 class="text-xl font-semibold text-gray-800">{{ map_title }}</h1>
-      <div class="text-sm text-gray-500 mt-1">
-        File: <span class="font-mono">{{ filename }}</span>
+  <main class="flex-1 flex flex-col">
+    <!-- Enhanced Header -->
+    <div class="flex items-center justify-between bg-gradient-to-r from-white to-slate-50 shadow-lg p-6 border-b border-slate-200">
+      <!-- Left side: Title and filename -->
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">{{ map_title }}</h1>
+        <div class="text-sm text-gray-500 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          File: <span class="font-mono font-medium ml-1">{{ filename }}</span>
+        </div>
+      </div>
+      <!-- Right side: Action buttons -->
+      <div class="flex items-center gap-3">
+        <a href="/view/{{file_id}}"
+          class="flex items-center px-6 py-3 rounded-xl text-white text-sm bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 shadow-lg hover:shadow-xl transition-all duration-300 no-underline transform hover:scale-105">
+          <i class="fa-solid fa-diagram-project mr-2"></i>
+          <span class="font-medium">View Minutes</span>
+        </a>
       </div>
     </div>
-    <!-- Right side: Action buttons -->
-    <div class="flex items-center flex-wrap gap-2 sm:gap-3" x-show="!minimizeSidebar">
-        <a href="/view/{{file_id}}"
-          class="flex items-center px-4 py-2 rounded-lg text-white text-sm bg-red-400 hover:bg-red-600 shadow-sm transition no-underline">
-          <i class="fa-solid fa-diagram-project mr-2"></i>
-          View Minutes
-        </a>
-    </div>
-  </div>
 
-  <!-- Mind map container -->
-  <div id="jsmind_container" class="relative mt-4 px-4 py-10"></div>
-  <div id="tooltip" class="tooltip"></div>
-</main>
-
+    <!-- Mind map container -->
+    <div id="jsmind_container" class="flex-1"></div>
+    <div id="tooltip" class="tooltip"></div>
+  </main>
 
   <script>
     console.log('jsMind.screenshot:', jsMind.screenshot);
@@ -206,37 +447,185 @@
     // Data from Flask (mindmapData is injected)
     const mindmapData = {{ jsmind_data | safe }};
 
+    // Initialize jsMind with improved settings
     jm = new jsMind({
       container: 'jsmind_container',
       theme: 'primary',
       editable: false,
-      support_html: false,
+      support_html: true,
       view: {
-        engine: 'canvas',                  // Use canvas for better performance over SVG
-        hmargin: 100,                      // Horizontal margin around the mind map
-        vmargin: 60,                       // Vertical margin between nodes
-        line_width: 2,                     // Slightly thifcker lines for better visibility
-        line_color: '#2563eb',            // Tailwind Blue-600, gives it a modern touch
-        node_overflow: 'wrap',            // Wrap long text instead of truncating
-        draggable: true,                   // Allow panning the mind map
+        engine: 'canvas',
+        hmargin: 120,
+        vmargin: 80,
+        line_width: 2,
+        line_color: '#2563eb',
+        node_overflow: 'wrap',
+        draggable: true,
         hide_scrollbars_when_dragging: true,
-        expand_level: 2,                   // Start with nodes expanded up to 2 levels
-        animate_to_center: true            // Animate map to center on load
+        expand_level: 2,
+        animate_to_center: true
       }
     });
+    
     jm.show(mindmapData);
 
+    // Enhanced keyboard event handling
+    document.addEventListener('keydown', (e) => {
+      // Prevent default if we're handling the key
+      const handled = handleKeyboardShortcut(e);
+      if (handled) {
+        e.preventDefault();
+        return false;
+      }
+    });
 
+    function handleKeyboardShortcut(e) {
+      // Global shortcuts (work regardless of selection)
+      switch (e.key.toLowerCase()) {
+        case 'e':
+          if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+            expandAll();
+            return true;
+          }
+          break;
+        case 'c':
+          if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+            collapseAll();
+            return true;
+          }
+          break;
+        case 'f':
+          if (!e.ctrlKey && !e.altKey && !e.metaKey) {
+            centerMap();
+            return true;
+          }
+          break;
+      }
 
-    // Collapse all except root
-    const nodes = jm.mind.nodes;
-    // Expand root node's immediate children before screenshot
-    const rootNode = jm.get_root();
-    if (rootNode && rootNode.children) {
-      rootNode.children.forEach(child => jm.expand_node(child.id));
+      // Node-specific shortcuts (require selected node)
+      if (!selectedNodeId) return false;
+
+      const node = jm.get_node(selectedNodeId);
+      if (!node) return false;
+
+      switch (e.key) {
+        case 'ArrowRight':
+          if (node.children && node.children.length) {
+            selectNode(node.children[0].id);
+            return true;
+          }
+          break;
+        case 'ArrowLeft':
+          if (node.parent) {
+            selectNode(node.parent.id);
+            return true;
+          }
+          break;
+        case ' ': // Spacebar to toggle node
+          jm.toggle_node(selectedNodeId);
+          return true;
+      }
+      return false;
     }
 
+    // Button event handlers
+    document.getElementById('expand-all-btn').addEventListener('click', expandAll);
+    document.getElementById('collapse-all-btn').addEventListener('click', collapseAll);
+    document.getElementById('center-map-btn').addEventListener('click', centerMap);
 
+    function expandAll() {
+      jm.expand_all();
+      showNotification('All nodes expanded');
+    }
+
+    function collapseAll() {
+      jm.collapse_all();
+      showNotification('All nodes collapsed');
+    }
+
+    function centerMap() {
+      const rootNode = jm.get_root();
+      if (rootNode && rootNode.element) {
+        rootNode.element.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'center'
+        });
+        showNotification('Map centered');
+      }
+    }
+
+    function selectNode(nodeId) {
+      // Remove previous selection
+      if (selectedNodeId) {
+        const prevNode = jm.get_node(selectedNodeId);
+        if (prevNode && prevNode.element) {
+          prevNode.element.classList.remove('selected');
+        }
+      }
+
+      // Add new selection
+      selectedNodeId = nodeId;
+      const node = jm.get_node(nodeId);
+      if (node && node.element) {
+        node.element.classList.add('selected');
+        
+        // Auto-focus if enabled
+        if (document.getElementById('auto-focus').checked) {
+          node.element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'center'
+          });
+        }
+      }
+    }
+
+    // Enhanced tooltip handling
+    let tooltipTimeout;
+
+    document.getElementById('jsmind_container').addEventListener('mouseenter', (e) => {
+      const nodeId = jm.view.get_binded_nodeid(e.target);
+      const node = nodeId ? jm.get_node(nodeId) : null;
+      if (node && node.topic && showTooltipToggle.checked) {
+        clearTimeout(tooltipTimeout);
+        tooltip.textContent = node.topic;
+        tooltip.classList.add('active');
+        updateTooltipPosition(e);
+      }
+    }, true);
+
+    document.getElementById('jsmind_container').addEventListener('mousemove', (e) => {
+      if (tooltip.classList.contains('active')) {
+        updateTooltipPosition(e);
+      }
+    });
+
+    document.getElementById('jsmind_container').addEventListener('mouseleave', (e) => {
+      // Add delay before hiding tooltip
+      tooltipTimeout = setTimeout(() => {
+        tooltip.classList.remove('active');
+      }, 100);
+    }, true);
+
+    function updateTooltipPosition(e) {
+      const rect = document.getElementById('jsmind_container').getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      
+      let left = e.clientX + 15;
+      let top = e.clientY - 35;
+      
+      // Prevent tooltip from going off-screen
+      if (left + tooltipRect.width > window.innerWidth) {
+        left = e.clientX - tooltipRect.width - 15;
+      }
+      if (top < 0) {
+        top = e.clientY + 15;
+      }
+      
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    }
 
     // Toggle tooltip visibility
     showTooltipToggle.addEventListener('change', function () {
@@ -245,58 +634,138 @@
       }
     });
 
-    // Click to expand/collapse node
-    document.getElementById('jsmind_container').addEventListener('click', e => {
-      const node = jm.find_node_by_dom(e.target);
+    // Enhanced click handling for node selection and expansion
+    document.getElementById('jsmind_container').addEventListener('click', (e) => {
+      const nodeId = jm.view.get_binded_nodeid(e.target);
+      
+      if (nodeId) {
+        const node = jm.get_node(nodeId);
+        if (node) {
+          // Toggle node expansion
+          jm.toggle_node(node.id);
 
-      if (node) {
-        const node = jm.get_node(node.id);
-        jm.toggle_node(node.id);
-
-        // Manage selection style
-        if (selectedNodeId) {
-          const prev = jm.get_node(selectedNodeId);
-          if (prev && prev.element) {
-            prev.element.classList.remove('selected');
-          }
-        }
-        selectedNodeId = node.id;
-        node.element.classList.add('selected');
-
-        // Auto-focus if enabled
-        if (document.getElementById('auto-focus').checked) {
-          node.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Select the node
+          selectNode(node.id);
         }
       }
     });
 
+    // Export functionality with loading state
     document.getElementById('export-btn').addEventListener('click', () => {
-      // Expand root children to ensure something is visible
+      const exportBtn = document.getElementById('export-btn');
+      const originalContent = exportBtn.innerHTML;
+      
+      // Show loading state
+      exportBtn.innerHTML = `
+        <div class="loading-spinner mr-2"></div>
+        <span>Exporting...</span>
+      `;
+      exportBtn.disabled = true;
+
+      // Expand all nodes for better screenshot
       const rootNode = jm.get_root();
       if (rootNode && rootNode.children) {
         rootNode.children.forEach(child => jm.expand_node(child.id));
       }
 
-      // Wait a bit for the UI to render, then take the screenshot
+      // Wait for expansion animation to complete
       setTimeout(() => {
-        if (jm.screenshot && typeof jm.screenshot.shoot === 'function') {
-          const screenshot = jm.screenshot.shoot();
-          if (screenshot) {
-            const link = document.createElement('a');
-            link.download = 'mindmap.png';
-            link.href = screenshot;
-            link.click();
-          } else {
-            alert('Screenshot failed. Try expanding the mind map.');
-          }
-        } else {
-          alert('Screenshot plugin not initialized correctly.');
+        try {
+          const screenshotData = jsMind.screenshot.shoot(jm, {
+            watermark: 'Speak2Summary',
+            background: '#ffffff',
+            paddingX: 30,
+            paddingY: 30
+          });
+
+          // Create download link
+          const link = document.createElement('a');
+          link.href = screenshotData;
+          link.download = `mindmap-${new Date().toISOString().slice(0, 10)}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          showNotification('Mind map exported successfully!');
+        } catch (error) {
+          console.error('Export failed:', error);
+          showNotification('Export failed. Please try again.', 'error');
+        } finally {
+          // Restore button state
+          exportBtn.innerHTML = originalContent;
+          exportBtn.disabled = false;
         }
-      }, 300);
+      }, 600);
     });
 
-    // Icon updates
+    // Notification system
+    function showNotification(message, type = 'success') {
+      // Remove existing notifications
+      const existingNotifications = document.querySelectorAll('.notification');
+      existingNotifications.forEach(n => n.remove());
+
+      const notification = document.createElement('div');
+      notification.className = `notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full ${
+        type === 'error' 
+          ? 'bg-red-500 text-white' 
+          : 'bg-green-500 text-white'
+      }`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      // Animate in
+      setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+      }, 100);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // Initialize with some expanded nodes
+    setTimeout(() => {
+      const rootNode = jm.get_root();
+      if (rootNode && rootNode.children) {
+        // Expand first level children
+        rootNode.children.forEach(child => jm.expand_node(child.id));
+      }
+      
+      // Auto-select root node
+      if (rootNode) {
+        selectNode(rootNode.id);
+      }
+    }, 500);
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      // Hide tooltip on resize
+      tooltip.classList.remove('active');
+    });
+
+    // Focus management
+    document.getElementById('jsmind_container').addEventListener('focus', () => {
+      document.getElementById('jsmind_container').style.outline = '2px solid #2563eb';
+    });
+
+    document.getElementById('jsmind_container').addEventListener('blur', () => {
+      document.getElementById('jsmind_container').style.outline = 'none';
+    });
+
+    // Make container focusable for keyboard navigation
+    document.getElementById('jsmind_container').setAttribute('tabindex', '0');
+
+    // Initialize feather icons
     feather.replace();
+    
+    console.log('Mind map initialized successfully');
   </script>
 </body>
 

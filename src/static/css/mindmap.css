@@ -6,6 +6,41 @@ body {
     background: #f1f5f9;
 }
 
+.jsmind-node {
+    white-space: normal !important;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 200px;
+    /* Adjust based on your needs */
+    padding: 6px 10px;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    background-color: #f9fafb;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.jsmind-node:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.jsmind-node.selected {
+    background-color: #2563eb !important;
+    /* Tailwind blue-600 */
+    color: white !important;
+}
+
+#tooltip.active {
+    display: block;
+    position: absolute;
+    background: #1f2937;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    z-index: 999;
+}
+
 #jsmind_container {
     width: calc(100vw - 288px);
     /* 288px is the width of sidebar (w-72 + padding) */
