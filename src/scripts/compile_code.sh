@@ -5,8 +5,7 @@ trap 'echo "❌ Error occurred. Exiting..."; exit 1' ERR
 
 # Constants
 readonly ROOT_DIRECTORY=$(pwd)
-readonly COMPILED_CODE_DIRECTORY="$ROOT_DIRECTORY/compiled_code"
-readonly COMPILED_CODE_SOURCE_DIRECTORY="$COMPILED_CODE_DIRECTORY"
+readonly COMPILED_CODE_SOURCE_DIRECTORY="$ROOT_DIRECTORY/build"
 
 # Comma-separated list of excluded Python files (relative to root, e.g., "main.py" or "tools/start.py")
 EXCLUDE_FILES=()
@@ -101,11 +100,11 @@ elapsed_time() { echo "$(echo "$(date +%s.%N) - $1" | bc)"; }
 # ------------------ EXECUTION ------------------
 
 log "🚀 Build started from current directory..."
-mkdir -p "$COMPILED_CODE_DIRECTORY"
+mkdir -p "$COMPILED_CODE_SOURCE_DIRECTORY"
 start=$(start_timer)
 prepare_output_dirs
 compile_python_files
 copy_other_files
 log "✅ Build completed in $(elapsed_time "$start") seconds"
 
-log "🎉 Compiled project is in: $COMPILED_CODE_DIRECTORY"
+log "🎉 Compiled project is in: $COMPILED_CODE_SOURCE_DIRECTORY"

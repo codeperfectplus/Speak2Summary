@@ -5,8 +5,8 @@ trap 'echo -e "\033[0;31m❌ Error occurred. Exiting...\033[0m"; exit 1' ERR
 
 # Constants
 CONTAINERS=("Speak2Summary-flask" "Speak2Summary-celery" "Speak2Summary-redis")
-COMPILE_SCRIPT="./compile_code.sh"
-COMPILED_DIR="./compiled_code"
+COMPILE_SCRIPT="src/scripts/compile_code.sh"
+COMPILED_DIR="build"
 COMPOSE_FILE="$COMPILED_DIR/docker-compose.yml"
 
 log() {
