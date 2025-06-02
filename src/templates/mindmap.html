@@ -308,14 +308,6 @@
             <span class="font-medium">Collapse All</span>
             <span class="shortcut-key">C</span>
           </button>
-          <button id="center-map-btn"
-            class="bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-400 hover:to-accent-500 text-white px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 group">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18m9-9l-9-9-9 9" />
-            </svg>
-            <span class="font-medium">Center Map</span>
-            <span class="shortcut-key">F</span>
-          </button>
         </div>
       </div>
 
@@ -331,43 +323,6 @@
 
     <!-- Enhanced Options Panel -->
     <div class="bg-gradient-to-br from-primary-800/50 to-primary-900/50 rounded-xl p-5 backdrop-blur-sm border border-primary-600/30">
-      <h3 class="text-primary-200 text-sm uppercase font-bold mb-4 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-        </svg>
-        Options
-      </h3>
-
-      <div class="space-y-4">
-        <!-- Auto Focus Toggle -->
-        <div class="flex items-center justify-between">
-          <label for="auto-focus" class="text-sm font-medium flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            Auto-focus Selected
-          </label>
-          <div class="toggle-switch">
-            <input type="checkbox" id="auto-focus" checked>
-            <span class="toggle-slider"></span>
-          </div>
-        </div>
-
-        <!-- Show Tooltip Toggle -->
-        <div class="flex items-center justify-between">
-          <label for="show-tooltip" class="text-sm font-medium flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            Show Node Tooltip
-          </label>
-          <div class="toggle-switch">
-            <input type="checkbox" id="show-tooltip" checked>
-            <span class="toggle-slider"></span>
-          </div>
-        </div>
-      </div>
 
       <!-- Keyboard Shortcuts Info -->
       <div class="mt-6 pt-4 border-t border-primary-600/30">
@@ -381,10 +336,7 @@
             <span>Collapse All</span>
             <span class="shortcut-key">C</span>
           </div>
-          <div class="flex justify-between">
-            <span>Center Map</span>
-            <span class="shortcut-key">F</span>
-          </div>
+   
           <div class="flex justify-between">
             <span>Navigate</span>
             <span class="shortcut-key">←→</span>
@@ -408,9 +360,9 @@
   </div>
 
   <!-- Main Mind Map Container -->
-  <main class="flex-1 flex flex-col">
+  <main class="flex-1 flex flex-col bg-white p-3 overflow-hidden relative">
     <!-- Enhanced Header -->
-    <div class="flex items-center justify-between bg-gradient-to-r from-white to-slate-50 shadow-lg p-6 border-b border-slate-200">
+    <div class="flex items-center justify-between mb-4 p-4 bg-gradient-to-r from-primary-100 to-primary-200 rounded-lg shadow-lg">
       <!-- Left side: Title and filename -->
       <div>
         <h1 class="text-2xl font-bold text-gray-800 mb-1">{{ map_title }}</h1>
@@ -422,7 +374,7 @@
         </div>
       </div>
       <!-- Right side: Action buttons -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center space-x-4">
         <a href="/view/{{file_id}}"
           class="flex items-center px-6 py-3 rounded-xl text-white text-sm bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 shadow-lg hover:shadow-xl transition-all duration-300 no-underline transform hover:scale-105">
           <i class="fa-solid fa-diagram-project mr-2"></i>
@@ -450,7 +402,7 @@
     // Initialize jsMind with improved settings
     jm = new jsMind({
       container: 'jsmind_container',
-      theme: 'primary',
+      theme: 'default',
       editable: false,
       support_html: true,
       view: {

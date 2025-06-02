@@ -64,7 +64,7 @@
   </script>
 </head>
 
-<body class="bg-gradient-to-br from-slate-50 to-blue-50 flex min-h-screen" x-data="viewData()" x-cloak>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen" x-data="viewData()" x-cloak>
     <!-- Toast Notification -->
     <div x-show="showToast" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 transform translate-y-2"
@@ -83,7 +83,7 @@
         </div>
     </div>
 
-    <div class="bg-gradient-to-br from-slate-50 to-blue-50 flex h-screen">
+    <div class="bg-gradient-to-br from-slate-50 to-blue-50 flex min-h-screen">
         <!-- Sidebar -->
         <div class="w-80 bg-gradient-to-br from-primary-800 to-primary-900 text-white p-6 flex flex-col shadow-xl transition-all duration-300"
             :class="{'w-20': minimizeSidebar, 'w-80': !minimizeSidebar}">
