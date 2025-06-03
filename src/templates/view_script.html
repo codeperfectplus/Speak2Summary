@@ -461,7 +461,8 @@
     const { jsPDF } = window.jspdf;
     const type = this.showTranscript ? 'transcript' : 'minutes';
     const content = this.showTranscript ? this.file.transcript : this.file.minutes;
-
+    const filename = this.file.filename.replace(/\.[^/.]+$/, '');
+    
     if (!content) {
         this.toastTitle = 'Export Failed';
         this.toastMessage = `No ${type} content available to export.`;
@@ -470,18 +471,9 @@
         return;
     }
 
-    // Create a clean, printable container
-// Create off-screen printable container
 const printable = document.createElement('div');
+printable.style.position = 'fixed';
 printable.innerHTML = content;
-printable.style.background = 'white';
-printable.style.color = 'black';
-printable.style.padding = '2rem';
-printable.style.width = '800px';
-printable.style.fontSize = '14px';
-printable.style.lineHeight = '1.6';
-printable.style.position = 'absolute';
-printable.className = 'pdf-content';
 document.body.appendChild(printable);
 
     const doc = new jsPDF();
@@ -489,7 +481,7 @@ document.body.appendChild(printable);
     try {
         await doc.html(printable, {
             callback: function (pdf) {
-                pdf.save(`${type}.pdf`);
+                pdf.save(`${filename}_${type}.pdf`);
                 printable.remove();
             },
             margin: [10, 10, 10, 10],
