@@ -457,54 +457,61 @@
                 },
 
                 
-                async exportAsPDF() {
+              async exportAsPDF() {
     const { jsPDF } = window.jspdf;
     const type = this.showTranscript ? 'transcript' : 'minutes';
-    const elementId = this.showTranscript ? '#transcript-content' : '#minutes-content';
+    const content = this.showTranscript ? this.file.transcript : this.file.minutes;
 
-    const originalEl = document.querySelector(elementId);
-    if (!originalEl) {
-        this.showToast = true;
+    if (!content) {
         this.toastTitle = 'Export Failed';
-        this.toastMessage = 'Could not find the content element to export.';
+        this.toastMessage = `No ${type} content available to export.`;
         this.toastType = 'error';
+        this.showToast = true;
         return;
     }
 
-    // Clone and make sure it's visible
-    const clone = originalEl.cloneNode(true);
-    clone.style.display = 'block';
-    clone.style.position = 'absolute';
-    clone.style.left = '-9999px'; // off-screen
-    document.body.appendChild(clone);
+    // Create a clean, printable container
+// Create off-screen printable container
+const printable = document.createElement('div');
+printable.innerHTML = content;
+printable.style.background = 'white';
+printable.style.color = 'black';
+printable.style.padding = '2rem';
+printable.style.width = '800px';
+printable.style.fontSize = '14px';
+printable.style.lineHeight = '1.6';
+printable.style.position = 'absolute';
+printable.className = 'pdf-content';
+document.body.appendChild(printable);
 
     const doc = new jsPDF();
 
     try {
-        await doc.html(clone, {
+        await doc.html(printable, {
             callback: function (pdf) {
                 pdf.save(`${type}.pdf`);
-                clone.remove(); // cleanup
+                printable.remove();
             },
             margin: [10, 10, 10, 10],
             x: 10,
             y: 10,
-            autoPaging: 'text',
             html2canvas: {
-                scale: 0.8
+                scale: 0.8,
+                useCORS: true,
             }
         });
 
-        this.showToast = true;
         this.toastTitle = 'PDF Exported';
         this.toastMessage = `Your ${type} has been exported as PDF.`;
         this.toastType = 'success';
     } catch (error) {
+        console.error(error);
         this.toastTitle = 'Export Failed';
         this.toastMessage = 'There was an error exporting the PDF.';
         this.toastType = 'error';
     }
 
+    this.showToast = true;
     setTimeout(() => {
         this.showToast = false;
     }, 3000);
