@@ -1,24 +1,40 @@
 #!/bin/bash
 
+# ----------------------------------------
+# 🚀 Python Build System with Cython
+# ----------------------------------------
+
 set -euo pipefail
-trap 'echo "❌ Error occurred. Exiting..."; exit 1' ERR
+trap 'error "❌ Error occurred. Exiting..."; exit 1' ERR
 
 # Constants
 readonly ROOT_DIRECTORY=$(pwd)
 readonly COMPILED_CODE_SOURCE_DIRECTORY="$ROOT_DIRECTORY/build"
 
-# Comma-separated list of excluded Python files (relative to root, e.g., "main.py" or "tools/start.py")
+# Directories to exclude (will be pruned recursively)
+readonly EXCLUDED_PATTERNS=(*/.git* */__pycache__* */venv* ./build*)
+
+# Optional: Read excluded files from .exclude_files if it exists
 EXCLUDE_FILES=()
+if [[ -f .exclude_files ]]; then
+    IFS=$'\n' read -d '' -r -a EXCLUDE_FILES < .exclude_files || true
+fi
 
+# ---------- Logging Utilities ----------
 log() {
-    echo -e "\033[1;34m[INFO]\033[0m $*"
+    local BLUE="\033[1;34m"
+    local RESET="\033[0m"
+    echo -e "${BLUE}[INFO]${RESET} $*"
 }
 
-safe_copy() {
-    cp -r "$1" "$2" || { echo "Error: Failed to copy $1"; exit 1; }
+error() {
+    local RED="\033[1;31m"
+    local RESET="\033[0m"
+    echo -e "${RED}[ERROR]${RESET} $*" >&2
 }
 
-icd_excluded() {
+# ---------- Helpers ----------
+is_excluded() {
     local rel_path="$1"
     for excluded in "${EXCLUDE_FILES[@]}"; do
         [[ "$rel_path" == "$excluded" ]] && return 0
@@ -26,22 +42,24 @@ icd_excluded() {
     return 1
 }
 
+prune_expr=()
+for pattern in "${EXCLUDED_PATTERNS[@]}"; do
+    prune_expr+=(-path "$pattern" -o)
+done
+
+# ---------- Directory Preparation ----------
 prepare_output_dirs() {
     log "Preparing output directories..."
     mkdir -p "$COMPILED_CODE_SOURCE_DIRECTORY"
-    find . -type d ! -path "./compiled_code*" \
-                  ! -path "*/.git*" \
-                  ! -path "*/__pycache__*" | while read -r dir; do
+    find . \( "${prune_expr[@]}" -false \) -prune -o -type d -print | while read -r dir; do
         mkdir -p "$COMPILED_CODE_SOURCE_DIRECTORY/${dir#./}"
     done
 }
 
-
+# ---------- Python Compilation ----------
 compile_python_files() {
     log "Converting Python files to shared objects..."
-    find . -name '*.py' ! -path "./compiled_code/*" \
-                        ! -path "*/.git/*" \
-                        ! -path "*/__pycache__/*" | while read -r py_file; do
+    find . \( "${prune_expr[@]}" -false \) -prune -o -name '*.py' -type f -print | while read -r py_file; do
         rel_path="${py_file#./}"
         if is_excluded "$rel_path"; then
             log "Excluded: $rel_path"
@@ -49,12 +67,9 @@ compile_python_files() {
             continue
         fi
 
-        if ! grep -q "# cython: language_level=" "$py_file"; then
-            echo "# cython: language_level=3" | cat - "$py_file" > tmp && mv tmp "$py_file"
-        fi
-
         c_file="${py_file%.py}.c"
-        cython "$py_file" -o "$c_file"
+        log "Compiling: $rel_path"
+        cython "$py_file" -3 -o "$c_file"
 
         output_dir="$(dirname "$COMPILED_CODE_SOURCE_DIRECTORY/$rel_path")"
         base_name="$(basename "$py_file" .py)"
@@ -64,21 +79,10 @@ compile_python_files() {
     done
 }
 
-is_excluded() {
-    local rel_path="$1"
-    for excluded in "${EXCLUDE_FILES[@]}"; do
-        [[ "$rel_path" == "$excluded" ]] && return 0
-    done
-    return 1
-}
-
-
+# ---------- Copy Static Assets ----------
 copy_other_files() {
     log "Copying non-Python files..."
-    find . -type f ! -name '*.py' ! -name '*.c' \
-        ! -path "./compiled_code/*" \
-        ! -path "*/.git/*" \
-        ! -path "*/__pycache__/*" | while read -r file; do
+    find . \( "${prune_expr[@]}" -false \) -prune -o -type f ! -name '*.py' ! -name '*.c' -print | while read -r file; do
         rel_path="${file#./}"
         target_path="$COMPILED_CODE_SOURCE_DIRECTORY/$rel_path"
         mkdir -p "$(dirname "$target_path")"
@@ -86,25 +90,21 @@ copy_other_files() {
     done
 }
 
-
-# Optional cleanup (build artifacts)
+# ---------- Cleanup (Optional) ----------
 cleanup() {
     log "Cleaning up temporary files..."
     rm -rf build
 }
 
-# Time tracking
+# ---------- Timer ----------
 start_timer() { date +%s.%N; }
 elapsed_time() { echo "$(echo "$(date +%s.%N) - $1" | bc)"; }
 
-# ------------------ EXECUTION ------------------
-
+# ---------- Execution ----------
 log "🚀 Build started from current directory..."
-mkdir -p "$COMPILED_CODE_SOURCE_DIRECTORY"
 start=$(start_timer)
 prepare_output_dirs
 compile_python_files
 copy_other_files
 log "✅ Build completed in $(elapsed_time "$start") seconds"
-
 log "🎉 Compiled project is in: $COMPILED_CODE_SOURCE_DIRECTORY"
