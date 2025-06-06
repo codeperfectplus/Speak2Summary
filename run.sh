@@ -5,9 +5,7 @@ trap 'echo -e "\033[0;31m❌ Error occurred. Exiting...\033[0m"; exit 1' ERR
 
 # Constants
 CONTAINERS=("Speak2Summary-flask" "Speak2Summary-celery" "Speak2Summary-redis")
-COMPILE_SCRIPT="src/scripts/compile_code.sh"
-COMPILED_DIR="build"
-COMPOSE_FILE="$COMPILED_DIR/docker-compose.yml"
+COMPOSE_FILE="docker-compose.yml"
 
 log() {
     echo -e "\033[1;34m[INFO]\033[0m $*"
@@ -26,22 +24,11 @@ stop_and_remove_containers() {
     done
 }
 
-run_compile_script() {
-    if [[ -f "$COMPILE_SCRIPT" ]]; then
-        log "Running compile script..."
-        bash "$COMPILE_SCRIPT"
-    else
-        echo -e "\033[0;31m❌ Compile script not found: $COMPILE_SCRIPT\033[0m"
-        exit 1
-    fi
-}
+
 
 start_docker_compose() {
-    if [[ -d "$COMPILED_DIR" && -f "$COMPOSE_FILE" ]]; then
-        log "Starting Docker Compose from compiled directory..."
-        pushd "$COMPILED_DIR" > /dev/null
+    if [[ -f "$COMPOSE_FILE" ]]; then
         docker compose up --build -d
-        popd > /dev/null
     else
         echo -e "\033[0;31m❌ Compiled code or docker-compose.yml not found.\033[0m"
         exit 1
@@ -56,11 +43,7 @@ cleanup() {
 # ------------------ MAIN ------------------
 
 log "🚀 Starting Speak2Summary deployment..."
-
 stop_and_remove_containers
-run_compile_script
-# go to compiled_code directory and run the compile script
 start_docker_compose
-
 # ping the :5000/health endpoint to ensure the service is up
 log "🎉 Speak2Summary started and cleaned up successfully!"
