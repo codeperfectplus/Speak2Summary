@@ -34,37 +34,37 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
- <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: {
-              100: '#e0eaff',
-              200: '#c0d1ff',
-              300: '#a0b9ff',
-              400: '#80a0ff',
-              500: '#6088fa',
-              600: '#2563eb',
-              700: '#1e51ca',
-              800: '#1742a9',
-              900: '#103388'
-            },
-            accent: {
-              400: '#06b6d4',
-              500: '#05a3be',
-              600: '#0492aa'
-            },
-            bg: '#f1f5f9'
-          },
-          animation: {
-            'bounce-gentle': 'bounce 1s infinite',
-            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-          }
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            100: '#e0eaff',
+                            200: '#c0d1ff',
+                            300: '#a0b9ff',
+                            400: '#80a0ff',
+                            500: '#6088fa',
+                            600: '#2563eb',
+                            700: '#1e51ca',
+                            800: '#1742a9',
+                            900: '#103388'
+                        },
+                        accent: {
+                            400: '#06b6d4',
+                            500: '#05a3be',
+                            600: '#0492aa'
+                        },
+                        bg: '#f1f5f9'
+                    },
+                    animation: {
+                        'bounce-gentle': 'bounce 1s infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
         }
-      }
-    }
-  </script>
+    </script>
 
 
 </head>
@@ -91,7 +91,7 @@
             <div x-data="{ open: true, dragover: false }" class="mb-5">
                 <div class="bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
                     <!-- Toggle Header -->
-                    
+
 
                     <h3 @click="open = !open"
                         class="text-primary-100 text-sm font-medium mb-2 flex items-center justify-between cursor-pointer">
@@ -364,26 +364,32 @@
 
         <!-- Main Content -->
         <div class="flex-1 overflow-hidden flex flex-col">
-            <!-- Header -->
-            <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-secondary-800">Transcription, Meeting Minutes & Mind Map</h2>
-                <div class="flex items-center space-x-4">
-                    <div x-show="uploadSuccess" x-transition class="text-sm text-green-600 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Files uploaded successfully!
+            <!-- Full-width Header -->
+            <header
+                class="w-full py-4 flex items-center justify-between shadow-md rounded-b-xl backdrop-blur-sm transition-all"
+                :class="darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-900 text-gray-100' : 'bg-gradient-to-r from-white to-gray-50 text-gray-800'">
+
+                <div class="px-10 flex items-center justify-between w-full">
+                    <h2 class="text-xl font-semibold text-secondary-800">Transcription, Meeting Minutes & Mind Map</h2>
+                    <div class="flex items-center space-x-4">
+                        <div x-show="uploadSuccess" x-transition class="text-sm text-green-600 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Files uploaded successfully!
+                        </div>
+                        <button id="refresh-btn" @click="refreshFileList"
+                            class="flex items-center px-4 py-2 bg-secondary-100 text-secondary-700 rounded-md hover:bg-secondary-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Refresh
+                        </button>
                     </div>
-                    <button id="refresh-btn" @click="refreshFileList"
-                        class="flex items-center px-4 py-2 bg-secondary-100 text-secondary-700 rounded-md hover:bg-secondary-200 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Refresh
-                    </button>
                 </div>
             </header>
 
@@ -609,21 +615,21 @@
                                         </a> -->
 
                                         <!-- Mind Map Download / View -->
-<div x-data="mindmapButton(file)">
-    <a :href="hasMindMap || generatedNow ? buttonHref : '#'"
-       @click="handleClick"
-       class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors group"
-       :class="{ 'pointer-events-none opacity-50 cursor-not-allowed': isGenerating }">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             class="h-4 w-4 mr-2 group-hover:animate-pulse" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span x-text="buttonText"></span>
-    </a>
-</div>
+                                        <div x-data="mindmapButton(file)">
+                                            <a :href="hasMindMap || generatedNow ? buttonHref : '#'"
+                                                @click="handleClick"
+                                                class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors group"
+                                                :class="{ 'pointer-events-none opacity-50 cursor-not-allowed': isGenerating }">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    class="h-4 w-4 mr-2 group-hover:animate-pulse" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span x-text="buttonText"></span>
+                                            </a>
+                                        </div>
 
 
 
@@ -931,59 +937,59 @@
     }
 
     function mindmapButton(file) {
-    return {
-        isGenerating: false,
-        hasMindMap: !!file.mind_map,
-        generatedNow: false,
-        buttonText: file.mind_map ? 'View Mindmap' : 'Generate Mindmap',
-        buttonHref: `/mindmap?id=${file.id}`,
+        return {
+            isGenerating: false,
+            hasMindMap: !!file.mind_map,
+            generatedNow: false,
+            buttonText: file.mind_map ? 'View Mindmap' : 'Generate Mindmap',
+            buttonHref: `/mindmap?id=${file.id}`,
 
-        async handleClick(event) {
-            // If already has mindmap, allow normal redirect
-            if (this.hasMindMap || this.generatedNow) return;
+            async handleClick(event) {
+                // If already has mindmap, allow normal redirect
+                if (this.hasMindMap || this.generatedNow) return;
 
-            // Prevent navigation if generating
-            event.preventDefault();
+                // Prevent navigation if generating
+                event.preventDefault();
 
-            this.isGenerating = true;
-            this.buttonText = 'Generating...';
+                this.isGenerating = true;
+                this.buttonText = 'Generating...';
 
-            try {
-                const llmModel = document.getElementById('llm-model')?.value || '';
-                const llmClient = llmModelToClient?.[llmModel] || '';
+                try {
+                    const llmModel = document.getElementById('llm-model')?.value || '';
+                    const llmClient = llmModelToClient?.[llmModel] || '';
 
-                const response = await fetch('/api/generate_mindmap', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: file.id,
-                        'llm-client': llmClient,
-                        'llm-model': llmModel
-                    })
-                });
+                    const response = await fetch('/api/generate_mindmap', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: file.id,
+                            'llm-client': llmClient,
+                            'llm-model': llmModel
+                        })
+                    });
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    alert('Error: ' + (error.error || 'Unknown error'));
+                    if (!response.ok) {
+                        const error = await response.json();
+                        alert('Error: ' + (error.error || 'Unknown error'));
+                        this.buttonText = 'Generate Mindmap';
+                        this.isGenerating = false;
+                        return;
+                    }
+
+                    this.hasMindMap = true;
+                    this.generatedNow = true;
+                    this.buttonText = 'View Mindmap';
+                    this.isGenerating = false;
+
+                } catch (err) {
+                    console.error(err);
+                    alert('Something went wrong.');
                     this.buttonText = 'Generate Mindmap';
                     this.isGenerating = false;
-                    return;
                 }
-
-                this.hasMindMap = true;
-                this.generatedNow = true;
-                this.buttonText = 'View Mindmap';
-                this.isGenerating = false;
-
-            } catch (err) {
-                console.error(err);
-                alert('Something went wrong.');
-                this.buttonText = 'Generate Mindmap';
-                this.isGenerating = false;
             }
-        }
-    };
-}
+        };
+    }
 
 
     document.addEventListener('alpine:init', () => {
