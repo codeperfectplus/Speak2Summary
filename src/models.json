@@ -16,7 +16,6 @@
         "gpt-4o": "openai",
         "gpt-4o-mini": "openai",
         "o4-mini": "openai",
-        "qwen/qwen3-14b": "lmstudio",
-        "ollama/llama3.1:8b": "ollama"
+        "qwen/qwen3-14b": "lmstudio"
     }
 }

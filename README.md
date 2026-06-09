@@ -46,11 +46,13 @@
    export GROQ_API_KEY=your_groq_api_key
    export OPENAI_API_KEY=your_openai_api_key
    export LOCAL_LLM_API_URL=http://your-local-llm-host:1234
+   export LOCAL_LLM_REQUEST_TIMEOUT=900
+   export GUNICORN_TIMEOUT=960
    ```
 
 
 
-*Replace the placeholder values with your actual keys and local LLM URL. For Ollama, use port 11434.*
+*Replace the placeholder values with your actual keys and local LLM URL. For Ollama, use port 11434. Increase `LOCAL_LLM_REQUEST_TIMEOUT` for slower local models, and keep `GUNICORN_TIMEOUT` higher than that value.*
 
 4. **Build and Run the Docker Container**
 
