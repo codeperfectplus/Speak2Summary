@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from flask import render_template, request
 from src.models import TranscriptEntry, db
-from transmeet import generate_mind_map_from_transcript
+from src.llm_clients import generate_mind_map_with_provider
 from transmeet.utils.general_utils import get_logger
 
 logger = get_logger(__name__)
@@ -155,7 +155,10 @@ def mindmap():
     else:
         transcript = file_record.transcript
 
-        mindmap_data = generate_mind_map_from_transcript(
+        if not file_record.llm_client or not file_record.llm_model:
+            return "No LLM settings found for this file. Generate the mind map from the home page first.", 400
+
+        mindmap_data = generate_mind_map_with_provider(
             transcript,
             llm_client=file_record.llm_client,
             llm_model=file_record.llm_model

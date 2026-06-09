@@ -5,7 +5,9 @@
 ## Features
 
 * 🎙️ **Audio Transcription**: Convert spoken content from meetings into text using advanced speech-to-text capabilities.
+* 🎬 **Video Upload Support**: Upload meeting videos directly and extract audio automatically before transcription.
 * 🧠 **Summarization with LLMs**: Generate concise summaries of transcribed text utilizing powerful language models.
+* 🧩 **Flexible LLM Providers**: Use cloud models (OpenAI, Groq) or connect to local models through LM Studio or Ollama.
 * Mind Map Generation: Create visual representations of meeting summaries to enhance understanding and retention.
 * 🖥️ **User-Friendly Interface**: Interact with a clean and responsive web UI built with Flask.
 * 🐳 **Dockerized Deployment**: Easily deploy the application using Docker and Docker Compose for a consistent environment setup.
@@ -43,11 +45,12 @@
    ```bash
    export GROQ_API_KEY=your_groq_api_key
    export OPENAI_API_KEY=your_openai_api_key
+   export LOCAL_LLM_API_URL=http://your-local-llm-host:1234
    ```
 
 
 
-*Replace `your_groq_api_key` and `your_openai_api_key` with your actual API keys.*
+*Replace the placeholder values with your actual keys and local LLM URL. For Ollama, use port 11434.*
 
 4. **Build and Run the Docker Container**
 

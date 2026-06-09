@@ -1,19 +1,22 @@
 {
     "transcription_model_to_client": {
-        "whisper-large-v3-turbo": "groq",
-        "whisper-large-v3": "groq",
-        "whisper-1": "openai",
         "gpt-4o-transcribe": "openai",
-        "gpt-4o-mini-transcribe": "openai"
+        "gpt-4o-mini-transcribe": "openai",
+        "whisper-1": "openai",
+        "whisper-large-v3-turbo": "groq",
+        "whisper-large-v3": "groq"
     },
     "llm_model_to_client": {
         "llama-3.3-70b-versatile": "groq",
-        "llama3-70b-8192": "groq",
-        "gemma2-9b-it": "groq",
-        "mistral-saba-24b": "groq",
-        "qwen-qwq-32b": "groq",
-        "gpt-3.5-turbo": "openai",
-        "chatgpt-4o-latest": "openai",
-        "gpt-4o-mini": "openai"
+        "llama-3.1-8b-instant": "groq",
+        "qwen/qwen3-32b": "groq",
+        "deepseek-r1-distill-llama-70b": "groq",
+        "gpt-4.1": "openai",
+        "gpt-4.1-mini": "openai",
+        "gpt-4o": "openai",
+        "gpt-4o-mini": "openai",
+        "o4-mini": "openai",
+        "qwen/qwen3-14b": "lmstudio",
+        "ollama/llama3.1:8b": "ollama"
     }
 }

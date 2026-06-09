@@ -5,17 +5,20 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    # ports:
-    #   - "5000:5000"
+    ports:
+      - "5000:5000"
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOCAL_LLM_API_URL=${LOCAL_LLM_API_URL}
+      - LOCAL_LLM_REQUEST_TIMEOUT=${LOCAL_LLM_REQUEST_TIMEOUT:-900}
+      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-960}
     depends_on:
       - redis
-    command: gunicorn -w 4 -b 0.0.0.0:5000 src.app:app --timeout 120
+    command: gunicorn -w 4 -b 0.0.0.0:5000 src.app:app --timeout ${GUNICORN_TIMEOUT:-960} --graceful-timeout 120
     networks:
       - Speak2Summary-net
-      - homelab
+
     labels:
       - "tsdproxy.enable=true"
       - "tsdproxy.name=speak2summary"
@@ -42,6 +45,8 @@ services:
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOCAL_LLM_API_URL=${LOCAL_LLM_API_URL}
+      - LOCAL_LLM_REQUEST_TIMEOUT=${LOCAL_LLM_REQUEST_TIMEOUT:-900}
     depends_on:
       - redis
     networks:
@@ -71,8 +76,7 @@ services:
 networks:
   Speak2Summary-net:
     driver: bridge
-  homelab:
-    external: true
+
 
 # networks:
 #   homelab:

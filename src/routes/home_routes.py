@@ -1,11 +1,12 @@
 # cython: language_level=3
+import os
+import json
+from pathlib import Path
+
 from flask import render_template
 
 from src.models import TranscriptEntry
 from . import audio_bp
-
-import json
-from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -26,4 +27,5 @@ def index():
     return render_template('index.html', files=files,         transcription_model_to_client=transcription_model_to_client,
         llm_model_to_client=llm_model_to_client,
         transcription_model_list=transcription_model_list,
-        llm_model_list=llm_model_list)
+        llm_model_list=llm_model_list,
+        local_llm_api_url=os.getenv('LOCAL_LLM_API_URL', ''))
