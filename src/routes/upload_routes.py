@@ -2,16 +2,20 @@
 
 import os
 import uuid
-from venv import logger
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
 
+from src.audio_extraction import extract_audio
 from src.models import db, TranscriptEntry
 from src.celery_worker import process_audio_file, process_transcript_file
 from src.config import app
 from transmeet.utils.general_utils import get_logger
 
-logger  = get_logger(__name__)
+logger = get_logger(__name__)
+
+AUDIO_EXTENSIONS = {'.wav', '.mp3', '.m4a', '.ogg', '.flac', '.aac', '.webm'}
+VIDEO_EXTENSIONS = {'.mp4', '.mov', '.mkv', '.avi', '.m4v', '.webm'}
+ALLOWED_MEDIA_EXTENSIONS = AUDIO_EXTENSIONS | VIDEO_EXTENSIONS
 
 from . import audio_bp
 
@@ -21,6 +25,27 @@ def save_file(file, tracking_id):
     path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
     file.save(path)
     return path, filename
+
+
+def prepare_media_file(file, tracking_id):
+    filepath, original_name = save_file(file, tracking_id)
+    ext = os.path.splitext(original_name)[1].lower()
+    mime_type = (file.mimetype or '').lower()
+
+    if ext not in ALLOWED_MEDIA_EXTENSIONS:
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        raise ValueError(f"Unsupported file type: {ext or 'unknown'}")
+
+    is_video_upload = mime_type.startswith('video/') or (ext in VIDEO_EXTENSIONS and ext not in AUDIO_EXTENSIONS)
+
+    if is_video_upload:
+        extracted_audio_path = os.path.splitext(filepath)[0] + '.wav'
+        extract_audio(filepath, extracted_audio_path)
+        os.remove(filepath)
+        return extracted_audio_path, original_name
+
+    return filepath, original_name
 
 def extract_text_from_file(file, ext):
     if ext == '.txt':
@@ -38,7 +63,7 @@ def extract_text_from_file(file, ext):
         raise ValueError("Unsupported file type")
 
 
-def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, t_model):
+def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, t_model, llm_client, llm_model):
     new_file = TranscriptEntry(
         id=tracking_id, #type: ignore
         filename=original_filename, #type: ignore
@@ -46,6 +71,8 @@ def create_audio_file_entry(tracking_id, original_filename, filepath, t_client, 
         status="queued", #type: ignore
         transcription_client=t_client, #type: ignore
         transcription_model=t_model, #type: ignore
+        llm_client=llm_client, #type: ignore
+        llm_model=llm_model, #type: ignore
     )
     db.session.add(new_file)
     db.session.commit()
@@ -66,27 +93,59 @@ def create_text_file_entry(tracking_id, original_filename, filepath, llm_client,
 
 @audio_bp.route('/upload', methods=['POST'])
 def upload():
-    if 'audio' not in request.files:
+    if 'audio' not in request.files and 'media' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
-    uploaded_files = request.files.getlist('audio')
+    uploaded_files = request.files.getlist('media') or request.files.getlist('audio')
     t_client = request.form.get('transcription-client')
     t_model = request.form.get('transcription-model')
+    llm_client = request.form.get('llm-client')
+    llm_model = request.form.get('llm-model')
 
     if not uploaded_files or uploaded_files[0].filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
     results = []
+    queued_count = 0
     for file in uploaded_files:
+        if not file or not file.filename:
+            continue
+
         tracking_id = str(uuid.uuid4())
-        filepath, original_name = save_file(file, tracking_id)
-        create_audio_file_entry(tracking_id, original_name, filepath, t_client, t_model)
+        filename = secure_filename(file.filename)
+
+        try:
+            filepath, original_name = prepare_media_file(file, tracking_id)
+        except Exception as exc:
+            logger.error(f"Error preparing media file {filename}: {exc}")
+            results.append({
+                'filename': filename,
+                'status': 'failed',
+                'error': str(exc)
+            })
+            continue
+
+        create_audio_file_entry(
+            tracking_id,
+            original_name,
+            filepath,
+            t_client,
+            t_model,
+            llm_client,
+            llm_model,
+        )
+
         process_audio_file.delay(tracking_id, filepath, t_client, t_model) #type: ignore
+
         results.append({
             'id': tracking_id,
             'filename': original_name,
             'status': 'queued'
         })
+        queued_count += 1
+
+    if queued_count == 0:
+        return jsonify({'error': 'No valid media files processed', 'results': results}), 400
 
     return jsonify(results)
 

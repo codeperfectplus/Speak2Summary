@@ -33,6 +33,9 @@
     <title>Speak2Summary - Meeting Minutes Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
     <script>
         tailwind.config = {
@@ -65,11 +68,20 @@
             }
         }
     </script>
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.20), transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(8, 145, 178, 0.18), transparent 45%),
+                linear-gradient(135deg, #f8fafc 0%, #ecfeff 55%, #f0f9ff 100%);
+        }
+    </style>
 
 
 </head>
 
-<body class="bg-gradient-to-br from-slate-50 to-blue-50 flex min-h-screen" x-data="appData()">
+<body class="flex min-h-screen antialiased" x-data="appData()">
     <div class="flex h-screen">
         <!-- Sidebar -->
         <div
@@ -87,7 +99,7 @@
                 </div>
             </div>
 
-            <!-- Upload Audio Section -->
+            <!-- Upload Media Section -->
             <div x-data="{ open: true, dragover: false }" class="mb-5">
                 <div class="bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
                     <!-- Toggle Header -->
@@ -101,7 +113,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            Upload Audio Files
+                            Upload Audio/Video Files
                         </div>
                         <svg :class="{'rotate-180': open}" class="h-4 w-4 text-primary-400 transition-transform"
                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -117,7 +129,7 @@
                             x-bind:class="{'bg-accent-500/10 border-accent-400': dragover}"
                             x-on:click="$refs.fileInput.click()">
 
-                            <input type="file" x-ref="fileInput" multiple accept="audio/*" class="hidden"
+                            <input type="file" x-ref="fileInput" multiple accept="audio/*,video/*" class="hidden"
                                 x-on:change="handleFileChange">
 
                             <svg xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +138,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            <p class="text-primary-200 text-sm">Drag & drop audio files here<br>or click to select</p>
+                            <p class="text-primary-200 text-sm">Drag & drop audio or video files here<br>or click to select</p>
                         </div>
 
                         <!-- Selected files preview -->
@@ -185,7 +197,7 @@
                                         </path>
                                     </svg>
                                 </template>
-                                <span x-text="uploading ? 'Processing...' : 'Process Audio Files'"></span>
+                                <span x-text="uploading ? 'Processing...' : 'Process Media Files'"></span>
                             </div>
                         </button>
                     </div>
@@ -283,7 +295,7 @@
 
 
             <!-- Transcription Settings Form -->
-            <div x-data="{ open: false }" class="mb-5">
+            <div x-data="transcriptionSettings()" class="mb-5">
                 <div class="bg-primary-800/30 p-4 rounded-lg border border-primary-700/50">
                     <div @click="open = !open" class="cursor-pointer select-none flex items-center justify-between">
                         <h3 class="text-primary-100 text-sm font-medium flex items-center">
@@ -338,6 +350,38 @@
                                     <option :value="model" x-text="model"></option>
                                 </template>
                             </select>
+                        </div>
+
+                        <div class="rounded-md bg-primary-900/30 border border-primary-700/50 p-2.5 text-xs text-primary-200">
+                            Selected LLM Provider:
+                            <span class="font-semibold text-accent-300" x-text="llmClient || 'not detected'"></span>
+                        </div>
+
+                        <div x-show="llmClient === 'lmstudio' || llmClient === 'ollama'" x-transition
+                            class="space-y-2 border border-primary-700/60 rounded-md p-3 bg-primary-900/20">
+                            <p class="text-xs text-primary-200 font-medium">Local Provider Settings</p>
+
+                            <div class="flex flex-col gap-1">
+                                <label for="llm-base-url" class="text-xs text-primary-300">Base URL</label>
+                                <input id="llm-base-url" type="text" x-model="llmBaseUrl" @input="persist()"
+                                    :placeholder="llmClient === 'lmstudio' ? 'http://your-host:1234' : 'http://your-host:11434'"
+                                    class="bg-primary-700/50 text-white text-sm rounded-md px-3 py-2 border border-primary-600/30 focus:ring-2 focus:ring-accent-400/50 focus:border-accent-400 focus:outline-none" />
+                                <p class="text-[11px] text-primary-300/80">If empty, server uses LOCAL_LLM_API_URL.</p>
+                            </div>
+
+                            <div class="flex flex-col gap-1">
+                                <label for="custom-llm-model" class="text-xs text-primary-300">Custom Model Name (optional)</label>
+                                <input id="custom-llm-model" type="text" x-model="customLLMModel" @input="persist()"
+                                    placeholder="Example: llama3.1:8b or your-local-model"
+                                    class="bg-primary-700/50 text-white text-sm rounded-md px-3 py-2 border border-primary-600/30 focus:ring-2 focus:ring-accent-400/50 focus:border-accent-400 focus:outline-none" />
+                            </div>
+
+                            <div class="flex flex-col gap-1">
+                                <label for="llm-api-key" class="text-xs text-primary-300">API Key (optional)</label>
+                                <input id="llm-api-key" type="password" x-model="llmApiKey"
+                                    placeholder="Only if your local gateway requires auth"
+                                    class="bg-primary-700/50 text-white text-sm rounded-md px-3 py-2 border border-primary-600/30 focus:ring-2 focus:ring-accent-400/50 focus:border-accent-400 focus:outline-none" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -680,7 +724,7 @@
                             </svg>
                         </div>
                         <h2 class="text-2xl font-semibold mb-3 text-secondary-800">All Set!, Ready to Start?</h2>
-                        <p class="mb-8 text-secondary-600">Upload an audio/text/pdf file to get started with
+                        <p class="mb-8 text-secondary-600">Upload an audio/video/text/pdf file to get started with
                             transcription,
                             meeting minutes, and mind map generation.</p>
                     </div>
@@ -718,9 +762,100 @@
 
     const transcriptionModelToClient = {{ transcription_model_to_client | tojson }};
     const llmModelToClient = {{ llm_model_to_client | tojson }};
+    const defaultLocalLlmApiUrl = {{ local_llm_api_url | tojson }};
 
     const transcriptionModelList = {{ transcription_model_list | tojson }};
     const llmModelList = {{ llm_model_list | tojson }};
+
+    const mediaExtensions = new Set([
+        'wav', 'mp3', 'm4a', 'ogg', 'flac', 'aac', 'webm', 'mp4', 'mov', 'mkv', 'avi', 'm4v'
+    ]);
+
+    function isLocalProvider(clientName) {
+        return clientName === 'lmstudio' || clientName === 'ollama';
+    }
+
+    function readCurrentSettings() {
+        const transcriptionModel = document.getElementById('transcription-model')?.value || '';
+        const selectedLLMModel = document.getElementById('llm-model')?.value || '';
+        const customLLMModel = document.getElementById('custom-llm-model')?.value?.trim() || '';
+        const selectedLLMClient = llmModelToClient[selectedLLMModel] || '';
+        const useCustomLocalModel = isLocalProvider(selectedLLMClient) && !!customLLMModel;
+
+        return {
+            transcriptionModel,
+            transcriptionClient: transcriptionModelToClient[transcriptionModel] || '',
+            llmModel: useCustomLocalModel ? customLLMModel : selectedLLMModel,
+            llmClient: selectedLLMClient,
+            llmBaseUrl: document.getElementById('llm-base-url')?.value?.trim() || defaultLocalLlmApiUrl || '',
+            llmApiKey: document.getElementById('llm-api-key')?.value?.trim() || '',
+        };
+    }
+
+    function transcriptionSettings() {
+        return {
+            open: false,
+            transcriptionModelList,
+            llmModelList,
+            transcriptionModel: transcriptionModelList[0] || '',
+            llmModel: llmModelList[0] || '',
+            transcriptionClient: '',
+            llmClient: '',
+            llmBaseUrl: '',
+            llmApiKey: '',
+            customLLMModel: '',
+
+            updateTranscriptionClient() {
+                this.transcriptionClient = transcriptionModelToClient[this.transcriptionModel] || '';
+            },
+
+            updateLLMClient() {
+                this.llmClient = llmModelToClient[this.llmModel] || '';
+                if (!isLocalProvider(this.llmClient)) {
+                    this.customLLMModel = '';
+                }
+            },
+
+            persist() {
+                localStorage.setItem('transcriptionSettings', JSON.stringify({
+                    transcriptionModel: this.transcriptionModel,
+                    llmModel: this.llmModel,
+                    llmBaseUrl: this.llmBaseUrl,
+                    customLLMModel: this.customLLMModel,
+                }));
+            },
+
+            init() {
+                const savedRaw = localStorage.getItem('transcriptionSettings');
+                if (savedRaw) {
+                    try {
+                        const saved = JSON.parse(savedRaw);
+                        if (saved.transcriptionModel && this.transcriptionModelList.includes(saved.transcriptionModel)) {
+                            this.transcriptionModel = saved.transcriptionModel;
+                        }
+                        if (saved.llmModel && this.llmModelList.includes(saved.llmModel)) {
+                            this.llmModel = saved.llmModel;
+                        }
+                        if (saved.llmBaseUrl) {
+                            this.llmBaseUrl = saved.llmBaseUrl;
+                        }
+                        if (saved.customLLMModel) {
+                            this.customLLMModel = saved.customLLMModel;
+                        }
+                    } catch (error) {
+                        console.error('Unable to parse saved settings', error);
+                    }
+                }
+
+                if (!this.llmBaseUrl && defaultLocalLlmApiUrl) {
+                    this.llmBaseUrl = defaultLocalLlmApiUrl;
+                }
+
+                this.updateTranscriptionClient();
+                this.updateLLMClient();
+            },
+        };
+    }
 
 
 
@@ -729,6 +864,7 @@
             selectedFiles: [],
             allFiles: [],
             showTranscript: false,
+            darkMode: false,
             autoRefresh: true,
             refreshInterval: null,
             dragover: false,
@@ -780,10 +916,10 @@
                 const files = event.target.files;
                 if (files) {
                     for (let i = 0; i < files.length; i++) {
-                        if (this.isAudioFile(files[i])) {
+                        if (this.isMediaFile(files[i])) {
                             this.selectedFiles.push(files[i]);
                         } else {
-                            this.showToastMessage('Only audio files are allowed', 'error');
+                            this.showToastMessage('Only audio/video files are allowed', 'error');
                         }
                     }
                 }
@@ -793,17 +929,22 @@
                 const files = event.dataTransfer.files;
                 if (files) {
                     for (let i = 0; i < files.length; i++) {
-                        if (this.isAudioFile(files[i])) {
+                        if (this.isMediaFile(files[i])) {
                             this.selectedFiles.push(files[i]);
                         } else {
-                            this.showToastMessage('Only audio files are allowed', 'error');
+                            this.showToastMessage('Only audio/video files are allowed', 'error');
                         }
                     }
                 }
             },
 
-            isAudioFile(file) {
-                return file.type.startsWith('audio/');
+            isMediaFile(file) {
+                if (file.type.startsWith('audio/') || file.type.startsWith('video/')) {
+                    return true;
+                }
+
+                const extension = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+                return mediaExtensions.has(extension);
             },
 
             removeFile(index) {
@@ -813,30 +954,47 @@
             uploadFiles() {
                 if (this.selectedFiles.length === 0) return;
 
+                const settings = readCurrentSettings();
+                if (!settings.transcriptionModel || !settings.transcriptionClient) {
+                    this.showToastMessage('Please choose a valid transcription model', 'error');
+                    return;
+                }
+
+                if (!settings.llmModel || !settings.llmClient) {
+                    this.showToastMessage('Please choose a valid LLM model', 'error');
+                    return;
+                }
+
                 this.uploading = true;
                 const formData = new FormData();
 
                 this.selectedFiles.forEach(file => {
-                    formData.append('audio', file);
+                    formData.append('media', file);
                 });
 
-                // Get selected models from the settings form fields instead of localStorage
-                const transcriptionModel = document.getElementById('transcription-model')?.value || '';
-                const llmModel = document.getElementById('llm-model')?.value || '';
+                formData.append('transcription-model', settings.transcriptionModel);
+                formData.append('transcription-client', settings.transcriptionClient);
+                formData.append('llm-model', settings.llmModel);
+                formData.append('llm-client', settings.llmClient);
 
-                const transcriptionClient = transcriptionModelToClient[transcriptionModel] || '';
-                const llmClient = llmModelToClient[llmModel] || '';
-
-                formData.append('transcription-model', transcriptionModel);
-                formData.append('transcription-client', transcriptionClient);
-                formData.append('llm-model', llmModel);
-                formData.append('llm-client', llmClient);
+                if (settings.llmBaseUrl) {
+                    formData.append('llm-base-url', settings.llmBaseUrl);
+                }
+                if (settings.llmApiKey) {
+                    formData.append('llm-api-key', settings.llmApiKey);
+                }
 
                 fetch('/upload', {
                     method: 'POST',
                     body: formData
                 })
-                    .then(response => response.json())
+                    .then(async response => {
+                        const payload = await response.json();
+                        if (!response.ok) {
+                            throw new Error(payload.error || 'Upload failed');
+                        }
+                        return payload;
+                    })
                     .then(data => {
                         this.uploading = false;
                         this.selectedFiles = [];
@@ -852,7 +1010,7 @@
                     .catch(error => {
                         this.uploading = false;
                         console.error('Error uploading files:', error);
-                        this.showToastMessage('Error uploading files', 'error');
+                        this.showToastMessage(error.message || 'Error uploading files', 'error');
                     });
             },
             refreshFileList() {
@@ -945,26 +1103,31 @@
             buttonHref: `/mindmap?id=${file.id}`,
 
             async handleClick(event) {
+                const settings = readCurrentSettings();
+                const modelChanged =
+                    (file.llm_model || '') !== settings.llmModel ||
+                    (file.llm_client || '') !== settings.llmClient;
+
                 // If already has mindmap, allow normal redirect
-                if (this.hasMindMap || this.generatedNow) return;
+                if ((this.hasMindMap || this.generatedNow) && !modelChanged) return;
 
                 // Prevent navigation if generating
                 event.preventDefault();
 
                 this.isGenerating = true;
-                this.buttonText = 'Generating...';
+                this.buttonText = modelChanged ? 'Regenerating...' : 'Generating...';
 
                 try {
-                    const llmModel = document.getElementById('llm-model')?.value || '';
-                    const llmClient = llmModelToClient?.[llmModel] || '';
-
                     const response = await fetch('/api/generate_mindmap', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             id: file.id,
-                            'llm-client': llmClient,
-                            'llm-model': llmModel
+                            'llm-client': settings.llmClient,
+                            'llm-model': settings.llmModel,
+                            'llm-base-url': settings.llmBaseUrl,
+                            'llm-api-key': settings.llmApiKey,
+                            force: modelChanged,
                         })
                     });
 
@@ -978,6 +1141,8 @@
 
                     this.hasMindMap = true;
                     this.generatedNow = true;
+                    file.llm_model = settings.llmModel;
+                    file.llm_client = settings.llmClient;
                     this.buttonText = 'View Mindmap';
                     this.isGenerating = false;
 
@@ -991,40 +1156,6 @@
         };
     }
 
-
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('transcriptionSettings', () => ({
-            transcriptionModel: 'whisper-large-v3-turbo',
-            transcriptionClient: '',
-
-            llmModel: 'llama-3.3-70b-versatile',
-            llmClient: '',
-
-            updateTranscriptionClient() {
-                this.transcriptionClient = this.transcriptionModelToClient[this.transcriptionModel] || '';
-            },
-
-            updateLLMClient() {
-                this.llmClient = this.llmModelToClient[this.llmModel] || '';
-            },
-
-            persist() {
-                localStorage.setItem('transcriptionSettings', JSON.stringify({
-                    transcriptionModel: this.transcriptionModel,
-                    llmModel: this.llmModel
-                }));
-            },
-
-            init() {
-                const llm_model = document.getElementById('llm-model');
-                if (saved) {
-                    this.llmModel = saved.llmModel;
-                }
-                this.updateTranscriptionClient();
-                this.updateLLMClient();
-            }
-        }));
-    });
     function transcriptUploadForm() {
         return {
             transcriptText: '',
@@ -1077,12 +1208,15 @@
                     return;
                 }
 
-                // Get selected model values
-                const llmModel = document.getElementById('llm-model')?.value || '';
-                const llmClient = llmModelToClient[llmModel] || '';
-
-                formData.append('llm-model', llmModel);
-                formData.append('llm-client', llmClient);
+                const settings = readCurrentSettings();
+                formData.append('llm-model', settings.llmModel);
+                formData.append('llm-client', settings.llmClient);
+                if (settings.llmBaseUrl) {
+                    formData.append('llm-base-url', settings.llmBaseUrl);
+                }
+                if (settings.llmApiKey) {
+                    formData.append('llm-api-key', settings.llmApiKey);
+                }
 
                 try {
                     const response = await fetch('/upload_transcript', {
@@ -1120,23 +1254,32 @@
             buttonText: file.minutes_available ? 'View Minutes' : 'Generate Minutes',
 
             async handleClick() {
-                if (this.hasMinutes) {
+                const settings = readCurrentSettings();
+                const modelChanged =
+                    (file.llm_model || '') !== settings.llmModel ||
+                    (file.llm_client || '') !== settings.llmClient;
+
+                if (this.hasMinutes && !modelChanged) {
                     // Now only redirect if already generated
                     window.location.href = `/view/${file.id}`;
                     return;
                 }
 
                 this.isGenerating = true;
-                this.buttonText = 'Generating...';
+                this.buttonText = this.hasMinutes ? 'Regenerating...' : 'Generating...';
 
                 try {
-                    const llmModel = document.getElementById('llm-model')?.value || '';
-                    const llmClient = llmModelToClient[llmModel] || '';
-
                     const response = await fetch('/api/generate_meeting_minutes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: file.id, 'llm-client': llmClient, 'llm-model': llmModel })
+                        body: JSON.stringify({
+                            id: file.id,
+                            'llm-client': settings.llmClient,
+                            'llm-model': settings.llmModel,
+                            'llm-base-url': settings.llmBaseUrl,
+                            'llm-api-key': settings.llmApiKey,
+                            force: modelChanged,
+                        })
                     });
 
                     const data = await response.json();
@@ -1151,6 +1294,8 @@
                     // Update state to show "View Minutes" instead of redirecting
                     this.hasMinutes = true;
                     file.minutes_available = true;
+                    file.llm_model = settings.llmModel;
+                    file.llm_client = settings.llmClient;
                     this.buttonText = 'View Minutes';
 
                 } catch (e) {
